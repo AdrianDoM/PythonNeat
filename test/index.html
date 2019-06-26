@@ -1,7 +1,10 @@
 <html>
   <head>
     <title>neat-js</title>
-    <script type="text/javascript" src="../src/neat.js"></script>
+    <script type="text/javascript" src="../src/math-utils.js"></script>
+    <script type="text/javascript" src="../src/neat-node.js"></script>
+    <script type="text/javascript" src="../src/neat-link.js"></script>
+    <script type="text/javascript" src="../src/neat-genome.js"></script>
   </head>
   <body>
     <h1>neat-js testing</h1>
@@ -71,34 +74,33 @@
       // TEST BASIC GENOME FEED
       const g0 = Genome.basic(2,1)
       g0.links.forEach( link => link.weight = 1 )
-      g0.outputs.forEach( output => output.bias = 1 )
-      testNumArrayEquals(g0.feed(1, 1), [1/(1 + Math.exp(1))], 'BASIC GENOME FEED')
+      g0.nodes[2].bias = 1
+      testNumArrayEquals(g0.feed([1, 1]), [1/(1 + Math.exp(3))], 'BASIC GENOME FEED')
 
       // TEST ADD RANDOM NODE
       function testAddRandNode() {
         ++test_count
 
-        let success = [g0.addRandNode(g0.nodeCount)]
-        success.push(g0.nodeCount === 4)
-        success.push(g0.hidden.length === 1)
+        let success = [g0.addRandNode({node: g0.nodeCount, link: g0.linkCount})]
+        success.push(g0.nodeCount == 4)
+        success.push(g0.nodes.some( node => node.nType == NodeTypes.HIDDEN ))
 
-        const newNode = g0.hidden[0]
-        success.push(newNode.incomingLinks.length === 1)
+        const newNode = g0.nodes[3]
+        success.push(newNode.incomingLinks.length == 1)
 
-        const newLinkTo = g0.outputs.find( node =>
-          node.incomingLinks.some( link => link.from === newNode )
-        )
-        success.push(newLinkTo.incomingLinks.length === 3)
-        success.push(newLinkTo.incomingLinks.find( link => !link.isEnabled ).from
-          === g0.hidden[0].incomingLinks[0].from)
+        const oldNodeTo = g0.nodes[2]
+        success.push(oldNodeTo.incomingLinks.length == 3)
         
-        success = success.every( x => x )
+        const oldLinkId = oldNodeTo.incomingLinks.find( linkId => !g0.links[linkId].isEnabled )
+        success.push(g0.links[oldLinkId].from == g0.links[newNode.incomingLinks[0]].from)
+        
+        const allSucceded = success.every( x => x )
 
-        if (success) {
+        if (allSucceded) {
           ++success_count
           return true
         }
-        console.error('ADD RANDOM NODE failed!', 'Got:', g0)
+        console.error('ADD RANDOM NODE failed!', 'Got:', g0, success)
         return false
       }
       testAddRandNode()
