@@ -17,7 +17,7 @@ class Genome {
 
   // Add the specified Link to this Genome
   // Takes care of setting connections to end Nodes
-  addLink(linkId, from, to, isRecurrent, weight) {
+  addLink(linkId, from, to, isRecurrent, isEnabled, weight) {
     const newLink = new Link(linkId, from, to, isRecurrent, weight)
     this.links[linkId] = newLink
     this.linkIds.push(linkId)
@@ -59,8 +59,24 @@ class Genome {
     return gen
   }
 
+  // Returns a deep copy of this Genome
   clone() {
+    const newGenome = new Genome()
 
+    newGenome.nodeCount = this.nodeCount
+    newGenome.inputNum  = this.inputNum
+    newGenome.outputNum = this.outputNum
+    newGenome.linkCount = this.linkCount
+
+    // Shallow copy value arrays
+    newGenome.nodeOrder = this.nodeOrder.slice(0)
+    newGenome.linkIds   = this.linkIds.slice(0)
+
+    // Deep copy object arrays
+    newGenome.nodes = this.nodes.map( node => node.clone() )
+    newGenome.links = this.links.map( link => link.clone() )
+
+    return newGenome
   }
 
   // Activate a single node given its id and return the activation
@@ -194,8 +210,8 @@ class Genome {
     this.addNode(NodeTypes.HIDDEN, availableIds.node, orderIndex)
 
     // The new weights of the Links are specified in the NEAT paper
-    this.addLink(availableIds.link++, from, availableIds.node, false, 1)
-    this.addLink(availableIds.link++, availableIds.node, to, false, oldLink.weight)
+    this.addLink(availableIds.link++, from, availableIds.node, false, true, 1)
+    this.addLink(availableIds.link++, availableIds.node, to, false, true, oldLink.weight)
 
     ++availableIds.node
 

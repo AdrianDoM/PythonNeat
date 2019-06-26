@@ -1,116 +1,21 @@
 <html>
   <head>
     <title>neat-js</title>
+
+    <!-- Source scripts -->
     <script type="text/javascript" src="../src/math-utils.js"></script>
     <script type="text/javascript" src="../src/neat-node.js"></script>
     <script type="text/javascript" src="../src/neat-link.js"></script>
     <script type="text/javascript" src="../src/neat-genome.js"></script>
+
+    <!-- Test scripts -->
+    <script type="text/javascript" src="./test-utils.js"></script>
+    <script type="text/javascript" src="./tests.js"></script>
+
   </head>
   <body>
     <h1>neat-js testing</h1>
     <script>
-      let test_count    = 0
-      let success_count = 0
-
-      const eps = 1e-8
-
-      // Performs a TEST checking if the two provided objects are equal
-      function testEquals(result, expected, test_name) {
-        ++test_count
-        if (result === expected) {
-          ++success_count
-          return true
-        }
-        console.error(test_name + ' failed!', 'Expected:', expected, 'But got:', result)
-        return false
-      }
-
-      // Helper function to test if a Number if within epsilon of another
-      Number.prototype.within = function(x) {
-        return x - eps <= this && this <= x + eps
-      }
-
-      // Performs a TEST checking if the two provided Arrays of Numbers
-      // are equal to within epsilon
-      function testNumArrayEquals(result, expected, test_name) {
-        ++test_count
-        if (result.every( (res, i) => res.within(expected[i]) )) {
-          ++success_count
-          return true
-        }
-        console.error(test_name + ' failed!', 'Expected:', expected, 'But got:', result)
-        return false
-      }
-
-      /*
-      * ·--------------·
-      * | TEST SECTION |
-      * ·--------------·
-      */
-
-      // TEST RANDOM INT GENERATOR
-      function testRandInt() {
-        ++test_count
-
-        const randInts1 = []
-        for (let i = 0; i < 10; ++i)
-          randInts1.push(Math.randInt(10, 20))
-        const firstTest = randInts1.every( n => n === Math.floor(n) && 10 <= n && n < 20 )
-
-        const randInts2 = []
-        for (let i = 0; i < 10; ++i)
-          randInts2.push(Math.randInt(-5, 5))
-        const secondTest = randInts2.every( n => n === Math.floor(n) && -5 <= n && n < 5 )
-
-        if (firstTest && secondTest) {
-          ++success_count
-          return true
-        }
-        console.error('RANDOM INT GENERATOR failed!', 'Got:', randInts1, randInts2)
-        return false
-      }
-      testRandInt()
-
-      // TEST BASIC GENOME FEED
-      const g0 = Genome.basic(2,1)
-      g0.links.forEach( link => link.weight = 1 )
-      g0.nodes[2].bias = 1
-      testNumArrayEquals(g0.feed([1, 1]), [1/(1 + Math.exp(3))], 'BASIC GENOME FEED')
-
-      // TEST ADD RANDOM NODE
-      function testAddRandNode() {
-        ++test_count
-
-        let success = [g0.addRandNode({node: g0.nodeCount, link: g0.linkCount})]
-        success.push(g0.nodeCount == 4)
-        success.push(g0.nodes.some( node => node.nType == NodeTypes.HIDDEN ))
-
-        const newNode = g0.nodes[3]
-        success.push(newNode.incomingLinks.length == 1)
-
-        const oldNodeTo = g0.nodes[2]
-        success.push(oldNodeTo.incomingLinks.length == 3)
-        
-        const oldLinkId = oldNodeTo.incomingLinks.find( linkId => !g0.links[linkId].isEnabled )
-        success.push(g0.links[oldLinkId].from == g0.links[newNode.incomingLinks[0]].from)
-        
-        const allSucceded = success.every( x => x )
-
-        if (allSucceded) {
-          ++success_count
-          return true
-        }
-        console.error('ADD RANDOM NODE failed!', 'Got:', g0, success)
-        return false
-      }
-      testAddRandNode()
-
-      /*
-      * ·---------------------·
-      * | END OF TEST SECTION |
-      * ·---------------------·
-      */
-
       console.log(`Passed ${success_count}/${test_count} tests`) 
     </script>
   </body>

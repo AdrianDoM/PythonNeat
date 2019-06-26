@@ -16,13 +16,12 @@ class Node {
     }
     this.activation = 0
   }
-/* 
-  // Returns a copy of the current node to be populated with new
-  // incomingLinks
-  cloneNoLinks() {
+
+  // Returns a deep copy of this Node
+  clone() {
     if (this.nType != NodeTypes.INPUT)
-      return new Node(this.nType, this.id, [], this.bias)
+      return new Node(this.nType, this.id, this.incomingLinks.slice(0), this.bias)
     return new Node(this.nType, this.id)
   }
-*/
+
 }
