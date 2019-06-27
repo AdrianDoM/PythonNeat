@@ -24,7 +24,7 @@ testNumArrayEquals(g0.feed([1, 1]), [1/(1 + Math.exp(3))], 'BASIC GENOME FEED')
 // TEST ADD RANDOM NODE
 function testAddRandNode() {
   const tests = [
-    g0.addRandNode({node: g0.nodeCount, link: g0.linkCount}),
+    Mutators.addRandNode(g0, {node: g0.nodeCount, link: g0.linkCount}),
     g0.nodeCount == 4,
     g0.nodes.some( node => node.nType == NodeTypes.HIDDEN )
   ]
@@ -46,7 +46,7 @@ testAddRandNode()
 function testCloneGenome() {
   const g0 = Genome.basic(1,1)
   const g1 = g0.clone()
-  g1.addRandNode({node: 2, link:1})
+  Mutators.addRandNode(g1, {node: 2, link:1})
 
   const tests = [
     g0.nodeCount == 2 && g0.linkCount == 1,

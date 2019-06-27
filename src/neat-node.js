@@ -6,13 +6,13 @@ const NodeTypes = {
 
 class Node {
 
-  constructor(nodeType, nodeId, incomingLinks, bias) {
+  constructor(nodeType, nodeId, incomingLinks=[], bias=Math.rand(-1, 1)) {
     this.nType = nodeType
     this.id    = nodeId
     if (nodeType != NodeTypes.INPUT) {
       // incomingLinks stores Link ids
-      this.incomingLinks = (incomingLinks == undefined) ? [] : incomingLinks
-      this.bias = (bias == undefined) ? Math.rand(-1, 1) : bias
+      this.incomingLinks = incomingLinks
+      this.bias = bias
     }
     this.activation = 0
   }
@@ -21,7 +21,7 @@ class Node {
   clone() {
     if (this.nType != NodeTypes.INPUT)
       return new Node(this.nType, this.id, this.incomingLinks.slice(0), this.bias)
-    return new Node(this.nType, this.id)
+    return new Node(this.nType, this.id)  
   }
 
 }

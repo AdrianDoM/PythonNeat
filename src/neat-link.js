@@ -1,6 +1,6 @@
 class Link {
 
-  constructor(linkId, nodeFrom, nodeTo, isRecurrent, isEnabled, weight) {
+  constructor(linkId, nodeFrom, nodeTo, isRecurrent=false, isEnabled=true, weight=Math.rand(-1, 1)) {
     this.id   = linkId
     this.from = nodeFrom // Node ids
     this.to   = nodeTo
@@ -8,9 +8,9 @@ class Link {
     // Recursive Links are handled naturally by the implementation
     // The only special behaviour is that recurrent Links cannot be
     // split when adding a new node.
-    this.isRecurrent = (isRecurrent == undefined) ? false : isRecurrent
-    this.isEnabled = (isEnabled == undefined) ? true : isEnabled
-    this.weight = (weight == undefined) ? Math.rand(-1, 1) : weight
+    this.isRecurrent = isRecurrent
+    this.isEnabled = isEnabled
+    this.weight = weight
   }
 
   // Returns a copy of this Link
