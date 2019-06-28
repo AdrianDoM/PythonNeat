@@ -1,5 +1,3 @@
-const MAX_TRIES = 10
-
 class Genome {
 
   // Empty Genome

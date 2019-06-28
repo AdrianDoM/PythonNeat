@@ -1,3 +1,14 @@
+const config = {
+  MAX_TRIES: 10,
+  mutateGenes: {
+    BIG_GENOME: 10,
+    STD_DEV: 2,
+    TWEAK_POINT: 0.5,
+    SEVERE_POINT: 0.8,
+    TWEAK_PROB: 0.5,
+    SEVERE_PROB: 0.3
+  },
+}
 
 // TEST RANDOM INT GENERATOR
 function testRandInt() {
@@ -24,7 +35,7 @@ testNumArrayEquals(g0.feed([1, 1]), [1/(1 + Math.exp(3))], 'BASIC GENOME FEED')
 // TEST ADD RANDOM NODE
 function testAddRandNode() {
   const tests = [
-    Mutators.addRandNode(g0, {node: g0.nodeCount, link: g0.linkCount}),
+    Mutators.addRandNode(g0, {node: g0.nodeCount, link: g0.linkCount}, config),
     g0.nodeCount == 4,
     g0.nodes.some( node => node.nType == NodeTypes.HIDDEN )
   ]
@@ -46,7 +57,7 @@ testAddRandNode()
 function testCloneGenome() {
   const g0 = Genome.basic(1,1)
   const g1 = g0.clone()
-  Mutators.addRandNode(g1, {node: 2, link:1})
+  Mutators.addRandNode(g1, {node: 2, link:1}, config)
 
   const tests = [
     g0.nodeCount == 2 && g0.linkCount == 1,
