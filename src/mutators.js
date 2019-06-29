@@ -227,6 +227,11 @@ const Mutators = {
     ++availableIds.node
 
     return true
+  },
+
+  // TODO:
+  mate: function(parent1, parent2) {
+    const baby = new Genome()
   }
 
 }

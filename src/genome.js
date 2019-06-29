@@ -4,13 +4,15 @@ class Genome {
   constructor() {
     this.nodeOrder = [] // Node ids ordered for activation
     this.nodes     = [] // Nodes indexed by their id
-    this.linkIds   = [] // Link ids
+    this.linkIds   = [] // Link ids (naturally ordered)
     this.links     = [] // Links indexed by their id
     
-    this.nodeCount = 0  // Mostly for tracking purpzoses
+    this.nodeCount = 0  // Mostly for tracking purposes
     this.linkCount = 0
     this.inputNum  = 0
     this.outputNum = 0
+
+    this.fitness   = 0
   }
 
   // Add the specified Link to this Genome
@@ -106,6 +108,49 @@ class Genome {
       outputValues.push(this.activateNode(o))
 
     return outputValues
+  }
+
+  // Returns an object containing five arrays: 'matching', 'disjoint1' and 
+  // 'disjoint2' and 'excess1' and 'excess2', which specify the Link ids that
+  // fall withing each class as described by the NEAT paper. 'disjoint1' contains
+  // those ids contained in genome1 whereas 'disjoint2' contains those in genome2;
+  // 'excess1' and 'excess2' are analogous
+  static compareLinks(genome1, genome2) {
+    const res = {
+      matching: [],
+      disjoint1: [],
+      disjoint2: [],
+      excess1: [],
+      excess2: []
+    }
+
+    // We take advantage of the fact that the linkIds list is sorted for both genomes
+    let i = 0, j = 0
+    while (i < genome1.linkCount && j < genome2.linkCount) {
+
+      // Add id to matching if both match
+      if (genome1.linkIds[i] == genome2.linkIds[j]) {
+        res.matching.push(genome1.linkIds[i])
+        ++i
+        ++j
+      }
+
+      // If one of the ids is smaller, the other genome missed it
+      else if (genome1.linkIds[i] < genome2.linkIds[j])
+        res.disjoint1.push(genome1.linkIds[i++])
+      else // if (genome1.linkIds[i] > genome2.linkIds[j])
+        res.disjoint2.push(genome2.linkIds[j++])
+
+    }
+    
+    // At this point one of the two genomes has been exhausted, we add the rest
+    // of the Link ids in the other one to its excess list
+    while (i < genome1.linkCount)
+      res.excess1.push(genome1.linkIds[i++])
+    while (j < genome2.linkCount)
+      res.excess2.push(genome2.linkIds[j++])
+
+    return res
   }
 
 }

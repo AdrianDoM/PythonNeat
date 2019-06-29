@@ -71,3 +71,25 @@ function testCloneGenome() {
   return testAllTrue(tests, 'CLONE GENOME')
 }
 testCloneGenome()
+
+// TEST COMPARE LINKS
+function testCompareLinks() {
+  const g1 = { linkCount: 6, linkIds: [1,2,5,6,8,9] }
+  const g2 = { linkCount: 5, linkIds: [1,3,4,8,10] }
+  const res = Genome.compareLinks(g1, g2)
+
+  const tests = [
+    res.matching.length == 2,
+    [1,8].every( (n, i) => n == res.matching[i]  ),
+    res.disjoint1.length == 4,
+    [2,5,6,9].every( (n, i) => n == res.disjoint1[i] ),
+    res.disjoint2.length == 2,
+    [3,4].every( (n, i) => n == res.disjoint2[i] ),
+    res.excess1.length == 0,
+    res.excess2.length == 1,
+    res.excess2[0] == 10
+  ]
+  
+  return testAllTrue(tests, 'COMPARE LINKS')
+}
+testCompareLinks()
