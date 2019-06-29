@@ -6,7 +6,7 @@ const NodeTypes = {
 
 class Node {
 
-  constructor(nodeType, nodeId, incomingLinks=[], bias=Math.rand(-1, 1)) {
+  constructor(nodeType, nodeId, incomingLinks=[], bias=MathUtils.rand(-1, 1)) {
     this.nType = nodeType
     this.id    = nodeId
     if (nodeType != NodeTypes.INPUT) {

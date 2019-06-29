@@ -15,10 +15,10 @@ const Mutators = {
         const choice = Math.random()
 
         if (choice < config.mutateGenes.SEVERE_PROB)
-          link.weight = Math.rand(-1, 1)
+          link.weight = MathUtils.rand(-1, 1)
 
         else if (choice < config.mutateGenes.SEVERE_PROB + config.mutateGenes.TWEAK_PROB)
-          link.weight += Math.gauss(0, config.mutateGenes.STD_DEV)
+          link.weight += MathUtils.gauss(0, config.mutateGenes.STD_DEV)
       })
     }
 
@@ -34,16 +34,16 @@ const Mutators = {
         if (i < SEVERE_POINT) {
           // Just consider tweaking
           if (choice < config.mutateGenes.TWEAK_PROB)
-            link.weight += Math.gauss(0, config.mutateGenes.STD_DEV)
+            link.weight += MathUtils.gauss(0, config.mutateGenes.STD_DEV)
         }
 
         else {
           // Consider both tweaking and severing
           if (choice < config.mutateGenes.SEVERE_PROB)
-            link.weight = Math.rand(-1, 1)
+            link.weight = MathUtils.rand(-1, 1)
 
           else if (choice < config.mutateGenes.SEVERE_PROB + config.mutateGenes.TWEAK_PROB)
-            link.weight += Math.gauss(0, config.mutateGenes.STD_DEV)
+            link.weight += MathUtils.gauss(0, config.mutateGenes.STD_DEV)
         }
       }
     }
@@ -51,7 +51,7 @@ const Mutators = {
 
   // Mutates the Node biases in a genome
   // For big genomes this is biased towards nodes with higher Id
-  // (probably newer but not necessarily)
+  // (probably newer but nconfigot necessarily)
   // Mutation may tweak the bias (add a std normal rv to it),
   // or severe it completely (reset it to a new random value in [-1,1))
   tweakBiases: function(genome, config) {
@@ -64,10 +64,10 @@ const Mutators = {
         const choice = Math.random()
 
         if (choice < config.mutateGenes.SEVERE_PROB)
-          node.bias = Math.rand(-1, 1)
+          node.bias = MathUtils.rand(-1, 1)
 
         else if (choice < config.mutateGenes.SEVERE_PROB + config.mutateGenes.TWEAK_PROB)
-          node.bias += Math.gauss(0, config.mutateGenes.STD_DEV)
+          node.bias += MathUtils.gauss(0, config.mutateGenes.STD_DEV)
       })
     }
 
@@ -85,16 +85,16 @@ const Mutators = {
         if (i < SEVERE_POINT) {
           // Just consider tweaking
           if (choice < config.mutateGenes.TWEAK_PROB)
-            node.bias += Math.gauss(0, config.mutateGenes.STD_DEV)
+            node.bias += MathUtils.gauss(0, config.mutateGenes.STD_DEV)
         }
 
         else {
           // Consider both tweaking and severing
           if (choice < config.mutateGenes.SEVERE_PROB)
-            node.bias = Math.rand(-1, 1)
+            node.bias = MathUtils.rand(-1, 1)
 
           else if (choice < config.mutateGenes.SEVERE_PROB + config.mutateGenes.TWEAK_PROB)
-            node.bias += Math.gauss(0, config.mutateGenes.STD_DEV)
+            node.bias += MathUtils.gauss(0, config.mutateGenes.STD_DEV)
         }
       }
     }
@@ -104,7 +104,7 @@ const Mutators = {
   // property. When disabling a Link, we first check if doing so would
   // lead to a Node having no outgoing Link (redering it useless)
   toggleEnable: function(genome) {
-    const linkId = genome.linkIds[Math.randInt(genome.linkCount)]
+    const linkId = genome.linkIds[MathUtils.randInt(genome.linkCount)]
     const link = genome.links[linkId]
 
     if (!link.isEnabled) link.isEnabled = true
@@ -119,9 +119,10 @@ const Mutators = {
     }
   },
 
-  // TODO:
-  reenableFirst: function(genome, config) {
-    
+  // Enables the first disabled Link in the genome
+  reenableFirst: function(genome) {
+    const firstId = genome.linkIds.find( linkId => genome.links[linkId].isEnabled == false )
+    genome.links[firstId].isEnabled = true
   },
 
   // Adds a random forward Link to the given Genome
@@ -133,12 +134,12 @@ const Mutators = {
 
     while (!found && tries++ < config.MAX_TRIES) {
       // Select random 'from' Node among inputs and hidden
-      fromOrderIndex = Math.randInt(0, genome.nodeCount - genome.outputNum)
+      fromOrderIndex = MathUtils.randInt(0, genome.nodeCount - genome.outputNum)
       from = genome.nodeOrder[fromOrderIndex]
       fromOrderIndex = (fromOrderIndex < genome.inputNum) ? genome.inputNum : fromOrderIndex + 1
 
       // Select random 'to' Node among hidden and outputs
-      toOrderIndex = Math.randInt(fromOrderIndex, genome.nodeCount)
+      toOrderIndex = MathUtils.randInt(fromOrderIndex, genome.nodeCount)
       to = genome.nodeOrder[toOrderIndex]
 
       // Check if such a Link already exists
@@ -163,13 +164,13 @@ const Mutators = {
 
     while (!found && tries++ < config.MAX_TRIES) {
       // Select random 'from' Node among hidden and outputs
-      fromOrderIndex = Math.randInt(genome.inputNum + 1, genome.nodeCount)
+      fromOrderIndex = MathUtils.randInt(genome.inputNum + 1, genome.nodeCount)
       from = genome.nodeOrder[fromOrderIndex]
       if (fromOrderIndex >= genome.nodeCount - genome.outputNum)
         fromOrderIndex = genome.nodeCount - genome.outputNum
 
       // Select random 'to' Node among hidden
-      toIndex = Math.randInt(genome.inputNum, fromOrderIndex)
+      toIndex = MathUtils.randInt(genome.inputNum, fromOrderIndex)
       to = genome.nodeOrder[toOrderIndex]
 
       // Check if such a Link already exists
@@ -197,7 +198,7 @@ const Mutators = {
 
     while (!found && tries++ < config.MAX_TRIES) {
       // Select a random Link
-      oldLinkId = genome.linkIds[Math.randInt(0, genome.linkIds.length)]
+      oldLinkId = genome.linkIds[MathUtils.randInt(0, genome.linkIds.length)]
       oldLink = genome.links[oldLinkId]
 
       // Check if oldLink is enabled and not recurrent

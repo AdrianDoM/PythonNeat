@@ -1,32 +1,3 @@
-Math.rand = function(...args) {
-  let min, max
-  if (args.length == 1) {
-    min = 0
-    max = args[0]
-  } else {
-    min = args[0]
-    max = args[1]
-  }
-
-  return min + Math.random() * (max - min)
-}
-
-Math.randInt = function(...args) {
-  let min, max
-  if (args.length == 0) {
-    min = 0
-    max = 1
-  } else if (args.length == 1) {
-    min = 0
-    max = args[0]
-  } else {
-    min = args[0]
-    max = args[1]
-  }
-
-  return min + Math.floor(Math.random() * (max - min))
-}
-
 // Gaussian random variable generator following the Marsaglia polar
 // method as outlined in "https://en.wikipedia.org/wiki/Marsaglia_polar_method"
 function gaussClosure() {
@@ -55,4 +26,37 @@ function gaussClosure() {
   return gauss
 }
 
-Math.gauss = gaussClosure()
+const MathUtils = {
+
+  rand: function(...args) {
+    let min, max
+    if (args.length == 1) {
+      min = 0
+      max = args[0]
+    } else {
+      min = args[0]
+      max = args[1]
+    }
+
+    return min + Math.random() * (max - min)
+  },
+
+  randInt: function(...args) {
+    let min, max
+    if (args.length == 0) {
+      min = 0
+      max = 1
+    } else if (args.length == 1) {
+      min = 0
+      max = args[0]
+    } else {
+      min = args[0]
+      max = args[1]
+    }
+
+    return min + Math.floor(Math.random() * (max - min))
+  },
+
+  gauss: gaussClosure()
+  
+}

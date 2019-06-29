@@ -14,12 +14,12 @@ const config = {
 function testRandInt() {
   const randInts1 = []
   for (let i = 0; i < 10; ++i)
-    randInts1.push(Math.randInt(10, 20))
+    randInts1.push(MathUtils.randInt(10, 20))
   const tests = [randInts1.every( n => n === Math.floor(n) && 10 <= n && n < 20 )]
 
   const randInts2 = []
   for (let i = 0; i < 10; ++i)
-    randInts2.push(Math.randInt(-5, 5))
+    randInts2.push(MathUtils.randInt(-5, 5))
   tests.push(randInts2.every( n => n === Math.floor(n) && -5 <= n && n < 5 ))
 
   return testAllTrue(tests, 'RANDOM INT GENERATOR')

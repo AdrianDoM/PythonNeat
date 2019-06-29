@@ -1,6 +1,6 @@
 class Link {
 
-  constructor(linkId, nodeFrom, nodeTo, isRecurrent=false, isEnabled=true, weight=Math.rand(-1, 1)) {
+  constructor(linkId, nodeFrom, nodeTo, isRecurrent=false, isEnabled=true, weight=MathUtils.rand(-1, 1)) {
     this.id   = linkId
     this.from = nodeFrom // Node ids
     this.to   = nodeTo
