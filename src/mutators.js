@@ -229,9 +229,54 @@ const Mutators = {
     return true
   },
 
-  // TODO:
+  // Returns the outcome of mating the two given parents
+  // Crossing over is performed as outlined in the NEAT paper
+  // The paper is vague in this regard, so a few assumptions and interpretations
+  // have been made, generally favouring simplicity of the algorithm
   mate: function(parent1, parent2) {
+    // Set parent1 to be the fittest (or a random one if their fitness is equal)
+    if (parent2.fitness > parent1.fitness) {
+      const temp = parent2
+      parent2 = parent1
+      parent1 = temp
+    } else if (parent1.fitness == parent2.fitness)
+      if (MathUtils.randInt(2)) {
+        const temp = parent2
+        parent2 = parent1
+        parent1 = temp
+      }
+
     const baby = new Genome()
+
+    baby.nodeCount = parent1.nodeCount
+    baby.linkCount = parent1.linkCount
+    baby.inputNum  = parent1.inputNum
+    baby.outputNum = parent1.outputNum
+
+    // Genome structure is inherited from the fittest parent
+    baby.nodeOrder = parent1.nodeOrder.slice(0)
+    baby.linkIds   = parent1.linkIds.slice(0)
+
+    // Individual Nodes and Links are selected randomly when present in both parents
+    baby.nodeOrder.forEach( nodeId => {
+      if (nodeId in parent2.nodes)
+        baby.nodes[nodeId] =
+          [parent1.nodes[nodeId], parent2.nodes[nodeId]][MathUtils.randInt(2)].clone()
+      
+      else
+        baby.nodes[nodeId] = parent1.nodes[nodeId].clone()
+    })
+
+    baby.linkIds.forEach( linkId => {
+      if (linkId in parent2.links)
+        baby.links[linkId] =
+          [parent1.links[linkId], parent2.links[linkId]][MathUtils.randInt(2)].clone()
+
+      else
+        baby.links[linkId] = parent1.links[linkId].clone()
+    })
+
+    return baby    
   }
 
 }

@@ -93,3 +93,5 @@ function testCompareLinks() {
   return testAllTrue(tests, 'COMPARE LINKS')
 }
 testCompareLinks()
+
+// TODO: TEST MATE
