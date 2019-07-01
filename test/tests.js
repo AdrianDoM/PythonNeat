@@ -1,14 +1,4 @@
-const config = {
-  MAX_TRIES: 10,
-  mutateGenes: {
-    BIG_GENOME: 10,
-    STD_DEV: 2,
-    TWEAK_POINT: 0.5,
-    SEVERE_POINT: 0.8,
-    TWEAK_PROB: 0.5,
-    SEVERE_PROB: 0.3
-  }
-}
+const config = new Config()
 
 // TEST RANDOM INT GENERATOR
 function testRandInt() {
@@ -35,8 +25,8 @@ testNumArrayEquals(g0.feed([1, 1]), [1/(1 + Math.exp(3))], 'BASIC GENOME FEED')
 // TEST ADD RANDOM NODE
 function testAddRandNode() {
   const tests = [
-    Mutators.addRandNode(g0, {node: g0.nodeCount, link: g0.linkCount}, config),
-    g0.nodeCount == 4,
+    Mutators.addRandNode(g0, {node: g0.nodeOrder.length, link: g0.linkIds.length}, config),
+    g0.nodeOrder.length == 4,
     g0.nodes.some( node => node.nType == NodeTypes.HIDDEN )
   ]
 
@@ -60,8 +50,8 @@ function testCloneGenome() {
   Mutators.addRandNode(g1, {node: 2, link:1}, config)
 
   const tests = [
-    g0.nodeCount == 2 && g0.linkCount == 1,
-    g1.nodeCount == 3 && g1.linkCount == 3,
+    g0.nodeOrder.length == 2 && g0.linkIds.length == 1,
+    g1.nodeOrder.length == 3 && g1.linkIds.length == 3,
     g0.nodes[1].incomingLinks.length == 1,
     g1.nodes[1].incomingLinks.length == 2,
     g0.links[0].isEnabled,
@@ -74,8 +64,8 @@ testCloneGenome()
 
 // TEST COMPARE LINKS
 function testCompareLinks() {
-  const g1 = { linkCount: 6, linkIds: [1,2,5,6,8,9] }
-  const g2 = { linkCount: 5, linkIds: [1,3,4,8,10] }
+  const g1 = { linkIds: [1,2,5,6,8,9] }
+  const g2 = { linkIds: [1,3,4,8,10] }
   const res = Genome.compareLinks(g1, g2)
 
   const tests = [
@@ -109,8 +99,8 @@ function testMate() {
   const baby = Mutators.mate(g1, g2)
 
   const tests = [
-    baby.nodeCount == 4,
-    baby.linkCount == 4
+    baby.nodeOrder.length == 4,
+    baby.linkIds.length == 4
     // The last check depends on chance, it should fail half the time
     // baby.linkIds.some( linkId => baby.links[linkId].weight == 100 )
   ]
@@ -118,3 +108,46 @@ function testMate() {
   return testAllTrue(tests, 'MATE')
 }
 testMate()
+
+// TEST SPECIES FITNESS
+function testSpeciesFitness() {
+  const g1 = Genome.basic(1,1)
+  const g2 = Genome.basic(3,3)
+
+  const species = Species.fromGenome(g1)
+  species.genomes.push(g2)
+
+  species.computeFitness({ fitnessFunc: genome => genome.linkIds.length })
+
+  const tests = [
+    species.genomes[0] == g2,
+    species.genomes[1] == g1,
+    g2.fitness == 3 * 3 / 2,
+    g1.fitness == 1 / 2
+  ]
+
+  return testAllTrue(tests, 'SPECIES FITNESS')
+}
+testSpeciesFitness()
+
+// TEST INIT POPULATION
+function testInitPopulation() {
+  const config = new Config({
+    INPUT_NUM: 3,
+    OUTPUT_NUM: 2,
+    POP_SIZE: 10,
+    species: {
+      WEIGHTS_COEFF: 3
+    }
+  })
+
+  const p = Population.initPopulation(config)
+
+  const tests = [
+    p.species.length > 1, // Probably true
+    p.species.map( s => s.genomes.length).reduce( (a,b) => a + b, 0) == 10
+  ]
+
+  return testAllTrue(tests)
+}
+testInitPopulation()

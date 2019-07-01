@@ -6,44 +6,44 @@ const Mutators = {
   // Mutation may tweak the weight (add a std normal rv to it),
   // or severe it completely (reset it to a new random value in [-1,1))
   tweakWeights: function(genome, config) {
-    const BIG_GENOME = genome.inputNum * genome.outputNum + config.mutateGenes.BIG_GENOME
+    const BIG_GENOME = genome.inputNum * genome.outputNum + config.mutators.BIG_GENOME
 
-    if (genome.linkCount < BIG_GENOME) {
+    if (genome.linkIds.length < BIG_GENOME) {
       // Small genome: treat all links equally
       genome.linkIds.forEach( linkId => {
         const link = genome.links[linkId]
         const choice = Math.random()
 
-        if (choice < config.mutateGenes.SEVERE_PROB)
+        if (choice < config.mutators.SEVERE_PROB)
           link.weight = MathUtils.rand(-1, 1)
 
-        else if (choice < config.mutateGenes.SEVERE_PROB + config.mutateGenes.TWEAK_PROB)
-          link.weight += MathUtils.gauss(0, config.mutateGenes.STD_DEV)
+        else if (choice < config.mutators.SEVERE_PROB + config.mutators.TWEAK_PROB)
+          link.weight += MathUtils.gauss(0, config.mutators.STD_DEV)
       })
     }
 
     else {
       // Big genome: bias mutations towards newer links
-      const TWEAK_POINT = Math.ceil(config.mutateGenes.TWEAK_POINT * genome.linkCount)
-      const SEVERE_POINT = Math.ceil(config.mutateGenes.SEVERE_POINT * genome.linkCount)
+      const TWEAK_POINT = Math.ceil(config.mutators.TWEAK_POINT * genome.linkIds.length)
+      const SEVERE_POINT = Math.ceil(config.mutators.SEVERE_POINT * genome.linkIds.length)
 
-      for (let i = TWEAK_POINT; i < genome.linkCount; ++i) {
+      for (let i = TWEAK_POINT; i < genome.linkIds.length; ++i) {
         const link = genome.links[genome.linkIds[i]]
         const choice = Math.random()
 
         if (i < SEVERE_POINT) {
           // Just consider tweaking
-          if (choice < config.mutateGenes.TWEAK_PROB)
-            link.weight += MathUtils.gauss(0, config.mutateGenes.STD_DEV)
+          if (choice < config.mutators.TWEAK_PROB)
+            link.weight += MathUtils.gauss(0, config.mutators.STD_DEV)
         }
 
         else {
           // Consider both tweaking and severing
-          if (choice < config.mutateGenes.SEVERE_PROB)
+          if (choice < config.mutators.SEVERE_PROB)
             link.weight = MathUtils.rand(-1, 1)
 
-          else if (choice < config.mutateGenes.SEVERE_PROB + config.mutateGenes.TWEAK_PROB)
-            link.weight += MathUtils.gauss(0, config.mutateGenes.STD_DEV)
+          else if (choice < config.mutators.SEVERE_PROB + config.mutators.TWEAK_PROB)
+            link.weight += MathUtils.gauss(0, config.mutators.STD_DEV)
         }
       }
     }
@@ -55,46 +55,46 @@ const Mutators = {
   // Mutation may tweak the bias (add a std normal rv to it),
   // or severe it completely (reset it to a new random value in [-1,1))
   tweakBiases: function(genome, config) {
-    const BIG_GENOME = genome.inputNum + genome.outputNum + config.mutateGenes.BIG_GENOME
+    const BIG_GENOME = genome.inputNum + genome.outputNum + config.mutators.BIG_GENOME
 
-    if (genome.nodeCount < BIG_GENOME) {
+    if (genome.nodeOrder.length < BIG_GENOME) {
       // Small genome: treat all nodes equally
       genome.nodeOrder.forEach( nodeId => {
         const node = genome.nodes[nodeId]
         const choice = Math.random()
 
-        if (choice < config.mutateGenes.SEVERE_PROB)
+        if (choice < config.mutators.SEVERE_PROB)
           node.bias = MathUtils.rand(-1, 1)
 
-        else if (choice < config.mutateGenes.SEVERE_PROB + config.mutateGenes.TWEAK_PROB)
-          node.bias += MathUtils.gauss(0, config.mutateGenes.STD_DEV)
+        else if (choice < config.mutators.SEVERE_PROB + config.mutators.TWEAK_PROB)
+          node.bias += MathUtils.gauss(0, config.mutators.STD_DEV)
       })
     }
 
     else {
       // Big genome: bias mutations towards nodes with higher id
-      const TWEAK_POINT = Math.ceil(config.mutateGenes.TWEAK_POINT * genome.nodeCount)
-      const SEVERE_POINT = Math.ceil(config.mutateGenes.SEVERE_POINT * genome.nodeCount)
+      const TWEAK_POINT = Math.ceil(config.mutators.TWEAK_POINT * genome.nodeOrder.length)
+      const SEVERE_POINT = Math.ceil(config.mutators.SEVERE_POINT * genome.nodeOrder.length)
 
       const nodeIds = genome.nodeOrder.slice(0).sort( (a, b) => a - b )
 
-      for (let i = TWEAK_POINT; i < genome.nodeCount; ++i) {
+      for (let i = TWEAK_POINT; i < genome.nodeOrder.length; ++i) {
         const node = genome.links[nodeIds[i]]
         const choice = Math.random()
 
         if (i < SEVERE_POINT) {
           // Just consider tweaking
-          if (choice < config.mutateGenes.TWEAK_PROB)
-            node.bias += MathUtils.gauss(0, config.mutateGenes.STD_DEV)
+          if (choice < config.mutators.TWEAK_PROB)
+            node.bias += MathUtils.gauss(0, config.mutators.STD_DEV)
         }
 
         else {
           // Consider both tweaking and severing
-          if (choice < config.mutateGenes.SEVERE_PROB)
+          if (choice < config.mutators.SEVERE_PROB)
             node.bias = MathUtils.rand(-1, 1)
 
-          else if (choice < config.mutateGenes.SEVERE_PROB + config.mutateGenes.TWEAK_PROB)
-            node.bias += MathUtils.gauss(0, config.mutateGenes.STD_DEV)
+          else if (choice < config.mutators.SEVERE_PROB + config.mutators.TWEAK_PROB)
+            node.bias += MathUtils.gauss(0, config.mutators.STD_DEV)
         }
       }
     }
@@ -104,7 +104,7 @@ const Mutators = {
   // property. When disabling a Link, we first check if doing so would
   // lead to a Node having no outgoing Link (redering it useless)
   toggleEnable: function(genome) {
-    const linkId = genome.linkIds[MathUtils.randInt(genome.linkCount)]
+    const linkId = genome.linkIds[MathUtils.randInt(genome.linkIds.length)]
     const link = genome.links[linkId]
 
     if (!link.isEnabled) link.isEnabled = true
@@ -132,14 +132,14 @@ const Mutators = {
     let found = false
     let fromOrderIndex, from, toOrderIndex, to
 
-    while (!found && tries++ < config.MAX_TRIES) {
+    while (!found && tries++ < config.mutators.MAX_TRIES) {
       // Select random 'from' Node among inputs and hidden
-      fromOrderIndex = MathUtils.randInt(0, genome.nodeCount - genome.outputNum)
+      fromOrderIndex = MathUtils.randInt(0, genome.nodeOrder.length - genome.outputNum)
       from = genome.nodeOrder[fromOrderIndex]
       fromOrderIndex = (fromOrderIndex < genome.inputNum) ? genome.inputNum : fromOrderIndex + 1
 
       // Select random 'to' Node among hidden and outputs
-      toOrderIndex = MathUtils.randInt(fromOrderIndex, genome.nodeCount)
+      toOrderIndex = MathUtils.randInt(fromOrderIndex, genome.nodeOrder.length)
       to = genome.nodeOrder[toOrderIndex]
 
       // Check if such a Link already exists
@@ -162,12 +162,12 @@ const Mutators = {
     let found = false
     let fromOrderIndex, from, toOrderIndex, to
 
-    while (!found && tries++ < config.MAX_TRIES) {
+    while (!found && tries++ < config.mutators.MAX_TRIES) {
       // Select random 'from' Node among hidden and outputs
-      fromOrderIndex = MathUtils.randInt(genome.inputNum + 1, genome.nodeCount)
+      fromOrderIndex = MathUtils.randInt(genome.inputNum + 1, genome.nodeOrder.length)
       from = genome.nodeOrder[fromOrderIndex]
-      if (fromOrderIndex >= genome.nodeCount - genome.outputNum)
-        fromOrderIndex = genome.nodeCount - genome.outputNum
+      if (fromOrderIndex >= genome.nodeOrder.length - genome.outputNum)
+        fromOrderIndex = genome.nodeOrder.length - genome.outputNum
 
       // Select random 'to' Node among hidden
       toIndex = MathUtils.randInt(genome.inputNum, fromOrderIndex)
@@ -196,7 +196,7 @@ const Mutators = {
     let found = false
     let oldLinkId, oldLink
 
-    while (!found && tries++ < config.MAX_TRIES) {
+    while (!found && tries++ < config.mutators.MAX_TRIES) {
       // Select a random Link
       oldLinkId = genome.linkIds[MathUtils.randInt(0, genome.linkIds.length)]
       oldLink = genome.links[oldLinkId]
@@ -216,7 +216,7 @@ const Mutators = {
 
     // The new Node will be positioned as close as possible to oldLink.to
     // in the Genome list
-    let orderIndex = (genome.nodes[to].nType == NodeTypes.OUTPUT) ? genome.nodeCount - genome.outputNum
+    let orderIndex = (genome.nodes[to].nType == NodeTypes.OUTPUT) ? genome.nodeOrder.length - genome.outputNum
       : genome.nodeOrder.indexOf(to)
     genome.addNode(NodeTypes.HIDDEN, availableIds.node, orderIndex)
 
@@ -248,8 +248,6 @@ const Mutators = {
 
     const baby = new Genome()
 
-    baby.nodeCount = parent1.nodeCount
-    baby.linkCount = parent1.linkCount
     baby.inputNum  = parent1.inputNum
     baby.outputNum = parent1.outputNum
 

@@ -7,8 +7,6 @@ class Genome {
     this.linkIds   = [] // Link ids (naturally ordered)
     this.links     = [] // Links indexed by their id
     
-    this.nodeCount = 0  // Mostly for tracking purposes
-    this.linkCount = 0
     this.inputNum  = 0
     this.outputNum = 0
 
@@ -21,7 +19,6 @@ class Genome {
     const newLink = new Link(linkId, from, to, isRecurrent, weight)
     this.links[linkId] = newLink
     this.linkIds.push(linkId)
-    ++this.linkCount
 
     this.nodes[to].incomingLinks.push(linkId)
   }
@@ -31,7 +28,6 @@ class Genome {
     const newNode = new Node(nodeType, nodeId, incomingLinks, bias)
     this.nodes[nodeId] = newNode
     this.nodeOrder.splice(orderIndex, 0, nodeId)
-    ++this.nodeCount
   }
   
   // Returns a new Genome with consists of the given number of input
@@ -41,15 +37,15 @@ class Genome {
 
     gen.inputNum = inputNum
     for (let i = 0; i < inputNum; ++i)
-      gen.addNode(NodeTypes.INPUT, gen.nodeCount, gen.nodeCount)
+      gen.addNode(NodeTypes.INPUT, gen.nodeOrder.length, gen.nodeOrder.length)
 
     gen.outputNum = outputNum
     for (let i = 0; i < outputNum; ++i)
-      gen.addNode(NodeTypes.OUTPUT, gen.nodeCount, gen.nodeCount)
+      gen.addNode(NodeTypes.OUTPUT, gen.nodeOrder.length, gen.nodeOrder.length)
 
     for (let i = 0; i < inputNum; ++i)
-      for (let o = inputNum; o < gen.nodeCount; ++o) {
-        gen.addLink(gen.linkCount, i, o)
+      for (let o = inputNum; o < gen.nodeOrder.length; ++o) {
+        gen.addLink(gen.linkIds.length, i, o)
       }
 
     return gen
@@ -59,10 +55,8 @@ class Genome {
   clone() {
     const newGenome = new Genome()
 
-    newGenome.nodeCount = this.nodeCount
     newGenome.inputNum  = this.inputNum
     newGenome.outputNum = this.outputNum
-    newGenome.linkCount = this.linkCount
 
     // Shallow copy value arrays
     newGenome.nodeOrder = this.nodeOrder.slice(0)
@@ -100,7 +94,7 @@ class Genome {
     for (let i = 0; i < this.inputNum; ++i) // for all inputs
       this.nodes[i].activation = inputValues[i]
 
-    for (let h = this.inputNum; h < this.nodeCount - this.outputNum; ++h)
+    for (let h = this.inputNum; h < this.nodeOrder.length - this.outputNum; ++h)
       this.activateNode(this.nodeOrder[h]) // activate hidden in order
 
     const outputValues = []
@@ -126,7 +120,7 @@ class Genome {
 
     // We take advantage of the fact that the linkIds list is sorted for both genomes
     let i = 0, j = 0
-    while (i < genome1.linkCount && j < genome2.linkCount) {
+    while (i < genome1.linkIds.length && j < genome2.linkIds.length) {
 
       // Add id to matching if both match
       if (genome1.linkIds[i] == genome2.linkIds[j]) {
@@ -145,9 +139,9 @@ class Genome {
     
     // At this point one of the two genomes has been exhausted, we add the rest
     // of the Link ids in the other one to its excess list
-    while (i < genome1.linkCount)
+    while (i < genome1.linkIds.length)
       res.excess1.push(genome1.linkIds[i++])
-    while (j < genome2.linkCount)
+    while (j < genome2.linkIds.length)
       res.excess2.push(genome2.linkIds[j++])
 
     return res
