@@ -7,7 +7,7 @@ const config = {
     SEVERE_POINT: 0.8,
     TWEAK_PROB: 0.5,
     SEVERE_PROB: 0.3
-  },
+  }
 }
 
 // TEST RANDOM INT GENERATOR
@@ -112,7 +112,7 @@ function testMate() {
     baby.nodeCount == 4,
     baby.linkCount == 4
     // The last check depends on chance, it should fail half the time
-    //baby.linkIds.some( linkId => baby.links[linkId].weight == 100 )
+    // baby.linkIds.some( linkId => baby.links[linkId].weight == 100 )
   ]
 
   return testAllTrue(tests, 'MATE')
