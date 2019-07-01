@@ -94,4 +94,27 @@ function testCompareLinks() {
 }
 testCompareLinks()
 
-// TODO: TEST MATE
+// TEST MATE
+function testMate() {
+  const g1 = Genome.basic(2,1)
+  const g2 = Genome.basic(2,1)
+
+  Mutators.addRandNode(g1, {node: 3, link: 2}, config)
+
+  g2.linkIds.forEach( linkId => g2.links[linkId].weight = 100 )
+
+  g1.fitness = 1
+  g2.fitness = 0
+
+  const baby = Mutators.mate(g1, g2)
+
+  const tests = [
+    baby.nodeCount == 4,
+    baby.linkCount == 4
+    // The last check depends on chance, it should fail half the time
+    //baby.linkIds.some( linkId => baby.links[linkId].weight == 100 )
+  ]
+
+  return testAllTrue(tests, 'MATE')
+}
+testMate()
