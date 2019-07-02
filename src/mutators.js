@@ -5,7 +5,7 @@ const Mutators = {
   // For big genomes this is biased towards the newer Links
   // Mutation may tweak the weight (add a std normal rv to it),
   // or severe it completely (reset it to a new random value in [-1,1))
-  tweakWeights: function(genome, config) {
+  mutateWeights: function(genome, config) {
     const BIG_GENOME = genome.inputNum * genome.outputNum + config.mutators.BIG_GENOME
 
     if (genome.linkIds.length < BIG_GENOME) {
@@ -54,7 +54,7 @@ const Mutators = {
   // (probably newer but nconfigot necessarily)
   // Mutation may tweak the bias (add a std normal rv to it),
   // or severe it completely (reset it to a new random value in [-1,1))
-  tweakBiases: function(genome, config) {
+  mutateBiases: function(genome, config) {
     const BIG_GENOME = genome.inputNum + genome.outputNum + config.mutators.BIG_GENOME
 
     if (genome.nodeOrder.length < BIG_GENOME) {
@@ -127,7 +127,7 @@ const Mutators = {
 
   // Adds a random forward Link to the given Genome
   // Returns whether the Link could be added
-  addRandForwardLink: function(genome, availableIds, config) {
+  addRandForwardLink: function(genome, availableIds, innovations, config) {
     let tries = 0
     let found = false
     let fromOrderIndex, from, toOrderIndex, to
@@ -150,14 +150,31 @@ const Mutators = {
     if (!found) return false
 
     // If a Link was found, add it to the Genome
-    genome.addLink(availableIds.link++, from, to)
+    // Check innovations to decide whether to use a new id
+    let id
+    if (from in innovations.link) {
+      if (to in innovations.link[from])
+        // Use the already existing id
+        id = innovations.link[from][to]
+      else {
+        // Use new id
+        id = availableIds.link++
+        innovations.link[from][to] = id
+      }
+    } else {
+      // Use new id
+      id = availableIds.link++
+      (innovations.link[from] = [])[to] = id
+    }
+
+    genome.addLink(id, from, to)
 
     return true
   },
 
   // Adds a random recurrent Link to the given Genome
   // Returns whether the Link could be added
-  addRandRecurrentLink: function(genome, availableIds, config) {
+  addRandRecurrentLink: function(genome, availableIds, innovations, config) {
     let tries = 0
     let found = false
     let fromOrderIndex, from, toOrderIndex, to
@@ -181,7 +198,24 @@ const Mutators = {
     if (!found) return false
 
     // If a Link was found, add it to the Genome
-    genome.addLink(availableIds.link++, from, to, true)
+    // Check innovations to decide whether to use a new id
+    let id
+    if (from in innovations.link) {
+      if (to in innovations.link[from])
+        // Use the already existing id
+        id = innovations.link[from][to]
+      else {
+        // Use new id
+        id = availableIds.link++
+        innovations.link[from][to] = id
+      }
+    } else {
+      // Use new id
+      id = availableIds.link++
+      (innovations.link[from] = [])[to] = id
+    }
+
+    genome.addLink(id, from, to)
 
     return true
   },
@@ -191,7 +225,7 @@ const Mutators = {
   // As explained in the NEAT paper, this is done by splitting an existing
   // enabled Link (must be forward in our case) into two new Links with the
   // new Node in between
-  addRandNode: function(genome, availableIds, config) {
+  addRandNode: function(genome, availableIds, innovations, config) {
     let tries = 0
     let found = false
     let oldLinkId, oldLink
@@ -214,17 +248,31 @@ const Mutators = {
     const from = oldLink.from
     const to   = oldLink.to
 
+    // Check innovations to decide whether to use a new ids
+    let id, leftId, rightId
+    if (oldLinkId in innovations.node) {
+      // Use old ids
+      id = innovations.node[oldLinkId].id
+      leftId = innovations.node[oldLinkId].leftId
+      rightId = innovations.node[oldLinkId].rightId
+    } else {
+      // Use new ids
+      id = availableIds.node++
+      leftId = availableIds.link++
+      rightId = availableIds.link++
+      innovations.node[oldLinkId] = {id, leftId, rightId}
+    }
+
     // The new Node will be positioned as close as possible to oldLink.to
     // in the Genome list
-    let orderIndex = (genome.nodes[to].nType == NodeTypes.OUTPUT) ? genome.nodeOrder.length - genome.outputNum
+    let orderIndex = (genome.nodes[to].nType == NodeTypes.OUTPUT)
+      ? genome.nodeOrder.length - genome.outputNum
       : genome.nodeOrder.indexOf(to)
-    genome.addNode(NodeTypes.HIDDEN, availableIds.node, orderIndex)
+    genome.addNode(NodeTypes.HIDDEN, id, orderIndex)
 
     // The new weights of the Links are specified in the NEAT paper
-    genome.addLink(availableIds.link++, from, availableIds.node, false, true, 1)
-    genome.addLink(availableIds.link++, availableIds.node, to, false, true, oldLink.weight)
-
-    ++availableIds.node
+    genome.addLink(leftId, from, id, false, true, 1)
+    genome.addLink(rightId, id, to, false, true, oldLink.weight)
 
     return true
   },

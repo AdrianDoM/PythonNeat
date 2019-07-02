@@ -1,4 +1,6 @@
-const config = new Config()
+const config = new Config({
+  SIGMOID_COEFF: 1
+})
 
 // TEST RANDOM INT GENERATOR
 function testRandInt() {
@@ -20,12 +22,12 @@ testRandInt()
 let g0 = Genome.basic(2,1)
 g0.links.forEach( link => link.weight = 1 )
 g0.nodes[2].bias = 1
-testNumArrayEquals(g0.feed([1, 1]), [1/(1 + Math.exp(3))], 'BASIC GENOME FEED')
+testNumArrayEquals(g0.feed([1, 1], config), [1/(1 + Math.exp(-3))], 'BASIC GENOME FEED')
 
 // TEST ADD RANDOM NODE
 function testAddRandNode() {
   const tests = [
-    Mutators.addRandNode(g0, {node: g0.nodeOrder.length, link: g0.linkIds.length}, config),
+    Mutators.addRandNode(g0, {node: g0.nodeOrder.length, link: g0.linkIds.length}, { node: [], link: [] }, config),
     g0.nodeOrder.length == 4,
     g0.nodes.some( node => node.nType == NodeTypes.HIDDEN )
   ]
@@ -47,7 +49,7 @@ testAddRandNode()
 function testCloneGenome() {
   const g0 = Genome.basic(1,1)
   const g1 = g0.clone()
-  Mutators.addRandNode(g1, {node: 2, link:1}, config)
+  Mutators.addRandNode(g1, {node: 2, link:1}, { node: [], link: [] }, config)
 
   const tests = [
     g0.nodeOrder.length == 2 && g0.linkIds.length == 1,
@@ -89,7 +91,7 @@ function testMate() {
   const g1 = Genome.basic(2,1)
   const g2 = Genome.basic(2,1)
 
-  Mutators.addRandNode(g1, {node: 3, link: 2}, config)
+  Mutators.addRandNode(g1, { node: 3, link: 2 }, { node: [], link: [] }, config)
 
   g2.linkIds.forEach( linkId => g2.links[linkId].weight = 100 )
 
@@ -151,3 +153,20 @@ function testInitPopulation() {
   return testAllTrue(tests)
 }
 testInitPopulation()
+
+// TEST NEXT GEN
+function testNextGen() {
+  const config = new Config({
+    INPUT_NUM: 3,
+    OUTPUT_NUM: 2,
+    POP_SIZE: 50,
+    // We try to evolve Genomes with 7 Nodes
+    fitnessFunc: genome => -Math.abs(genome.nodeOrder.length - 7)
+  })
+
+  const p = Population.initPopulation(config)
+
+  p.advance(10)
+  console.log(p)
+}
+testNextGen()
