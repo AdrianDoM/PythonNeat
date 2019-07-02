@@ -1,3 +1,4 @@
+"use strict"
 class Species {
 
   constructor() {
@@ -62,18 +63,16 @@ class Species {
   }
 
   reproduce(population, availableIds, innovations, config) {
-    const newGenomes = []
-
     // If the Species is big, clone the champion to the next generation
     if (this.genomes.length >= config.species.BIG_SPECIES)
-      newGenomes.push(this.genomes[0].clone())
+      this.newGenomes.push(this.genomes[0].clone())
 
     // Exclude least fit genomes
     this.genomes = this.genomes.slice(0,
       Math.round(this.genomes.length * config.species.DROP_POINT))
 
     // Generate the next generation of Genomes
-    while (newGenomes.length < this.offspringNum) {
+    while (this.newGenomes.length < this.offspringNum) {
 
       let baby
 
@@ -106,31 +105,32 @@ class Species {
       else {
         // Choose a random source Genome
         const source = this.genomes[MathUtils.randInt(this.genomes.length)]
+        baby = source.clone()
+
         const probs = config.mutators
 
         // STRUCTURAL MUTATIONS
         let choice = Math.random()
         if (choice < probs.RAND_FORW_LINK_PROB)
-          baby = Mutators.addRandForwardLink(source.clone(), availableIds,
-            innovations, config)
+          Mutators.addRandForwardLink(baby, availableIds, innovations, config)
 
         else if ((choice -= probs.RAND_FORW_LINK_PROB) < probs.RAND_REC_LINK_PROB)
-          baby = Mutators.addRandRecurrentLink(source.clone(), availableIds,
-            innovations, config)
+          Mutators.addRandRecurrentLink(baby, availableIds, innovations, config)
 
         else if ((choice -= probs.RAND_REC_LINK_PROB) < probs.RAND_NODE_PROB)
-          baby = Mutators.addRandNode(source.clone(), availableIds,
-            innovations, config)
+          Mutators.addRandNode(baby, availableIds, innovations, config)
 
         // VALUE MUTATIONS
         else {
-          baby = source.clone()
           if (Math.random() < probs.MUTATE_WEIGHTS_PROB)
             Mutators.mutateWeights(baby, config)
+
           if (Math.random() < probs.MUTATE_BIASES_PROB)
             Mutators.mutateBiases(baby, config)
+
           if (Math.random() < probs.TOGGLE_ENABLE_PROB)
             Mutators.toggleEnable(baby)
+
           if (Math.random() < probs.REENABLE_FIRST_PROB)
             Mutators.reenableFirst(baby)
         }
@@ -138,7 +138,7 @@ class Species {
 
       // Check if the baby is compatible to this Species
       if (this.isCompatible(baby, config))
-        newGenomes.push()
+        this.newGenomes.push(baby)
 
       // If not, find (or create) it a compatible Species
       else {
@@ -146,7 +146,7 @@ class Species {
         // We look for an existing Species compatible with the baby
         let found = false
         for (const species of population.species)
-          if (species != this && species.isCompatible(baby)) {
+          if (species != this && species.isCompatible(baby, config)) {
             species.newGenomes.push(baby)
             found = true
             break
@@ -155,7 +155,7 @@ class Species {
         // Also check among the newly created Species
         if (!found)
           for (const species of population.newSpecies)
-            if (species != this && species.isCompatible(baby)) {
+            if (species != this && species.isCompatible(baby, config)) {
               species.genomes.push(baby)
               found = true
               break
@@ -170,8 +170,6 @@ class Species {
 
     }
 
-    // No all the new Genomes are stored in newGenomes
-    this.newGenomes = newGenomes
   }
 
 }

@@ -1,3 +1,4 @@
+"use strict"
 class Population {
 
   constructor(config) {
@@ -36,23 +37,23 @@ class Population {
     newPopulation.availableIds.node = config.INPUT_NUM + config.OUTPUT_NUM
     newPopulation.availableIds.link = config.INPUT_NUM * config.OUTPUT_NUM
 
+    newPopulation.updateFitness()
+
     return newPopulation
   }
 
   // Removes stagnant Species and assigns the number of offspring to the
   // remaining Species. Species.computFitness() must have been called already
   updateOffspringNum() {
-    // Compute proportion of Genomes in each Species according to their fitness
     let totalSumFitness = 0
     let sumFitnesses = []
     for (let i = 0; i < this.species.length; ++i) {
       // If the Species is stagnant, remove it
-      if (this.species[i].stagnationCount >= this.config.species.STAGNANT)
+      if (this.species[i].stagnationCount >= this.config.species.STAGNANT && this.species.length > 1)
         this.species.splice(i, 1)
-      // Otherwise take its fitness into account
       else {
-        sumFitnesses.push(this.species.sumFitnesses)
-        totalSumFitness += this.species.sumFitnesses
+        sumFitnesses.push(this.species[i].sumFitness)
+        totalSumFitness += this.species[i].sumFitness
       }
     }
 
@@ -68,10 +69,22 @@ class Population {
     this.species[this.species.length - 1].offspringNum = remainingOffspring
   }
 
+  // Updates the fitness of each Species and Genome using the given
+  // fitness function
+  updateFitness() {
+    const newMaxFitness = Math.max(...this.species.map( species => species.computeFitness(config) ))
+    if (newMaxFitness <= this.maxFitness) ++this.stagnationCount
+    else this.stagnationCount = 0
+
+    this.maxFitness = newMaxFitness
+  }
+
   // Transitions this Population into the next generation
-  nextGen() {
+  nextGen(verbose=false) {
     // Otherwise, the Population is stagnant and only top 2 Species mate
     if (this.stagnationCount >= this.config.STAGNANT_POP) {
+      if (verbose) console.log('Stagnant population. Keeping top 2 Species')
+      this.stagnationCount = 0
       // Sort species by maxFitness
       this.species.sort( (s1, s2) => s2.maxFitness - s1.maxFitness )
       // Keep only the top 2
@@ -95,18 +108,25 @@ class Population {
     this.species.push(...this.newSpecies)
     this.newSpecies = []
 
-    // Update fitness
-    const newMaxFitness = Math.max(...this.species.map( species => species.computeFitness(config) ))
-    if (newMaxFitness <= this.maxFitness) ++this.stagnationCount
-    else this.stagnationCount = 0
+    // Prune empty species
+    let emptyIndex
+    while ((emptyIndex = this.species.findIndex( species => species.genomes.length == 0)) >= 0)
+      this.species.splice(emptyIndex, 1)
+
+    this.updateFitness()
 
     ++this.generation
+
+    if (verbose) {
+      console.log(`Gen ${this.generation} completed. Max. Fitness: ${this.maxFitness}`)
+      console.log(`Species distribution: `, this.species.map( s => s.genomes.length ))
+    }
   }
 
   // Advances this population the given number of generations
-  advance(generationNum) {
+  advance(generationNum, verbose=false) {
     while (generationNum-- > 0)
-      this.nextGen()
+      this.nextGen(verbose)
   }
 
 }

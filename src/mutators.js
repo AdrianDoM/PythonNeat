@@ -1,3 +1,4 @@
+"use strict"
 // Wrapper object for mutator methods
 const Mutators = {
 
@@ -122,7 +123,7 @@ const Mutators = {
   // Enables the first disabled Link in the genome
   reenableFirst: function(genome) {
     const firstId = genome.linkIds.find( linkId => genome.links[linkId].isEnabled == false )
-    genome.links[firstId].isEnabled = true
+    if (firstId) genome.links[firstId].isEnabled = true
   },
 
   // Adds a random forward Link to the given Genome
@@ -187,7 +188,7 @@ const Mutators = {
         fromOrderIndex = genome.nodeOrder.length - genome.outputNum
 
       // Select random 'to' Node among hidden
-      toIndex = MathUtils.randInt(genome.inputNum, fromOrderIndex)
+      toOrderIndex = MathUtils.randInt(genome.inputNum, fromOrderIndex)
       to = genome.nodeOrder[toOrderIndex]
 
       // Check if such a Link already exists

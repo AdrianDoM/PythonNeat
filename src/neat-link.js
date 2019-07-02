@@ -1,3 +1,4 @@
+"use strict"
 class Link {
 
   constructor(linkId, nodeFrom, nodeTo, isRecurrent=false, isEnabled=true, weight=MathUtils.rand(-1, 1)) {

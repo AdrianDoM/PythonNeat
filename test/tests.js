@@ -1,3 +1,4 @@
+"use strict"
 const config = new Config({
   SIGMOID_COEFF: 1
 })
@@ -154,19 +155,4 @@ function testInitPopulation() {
 }
 testInitPopulation()
 
-// TEST NEXT GEN
-function testNextGen() {
-  const config = new Config({
-    INPUT_NUM: 3,
-    OUTPUT_NUM: 2,
-    POP_SIZE: 50,
-    // We try to evolve Genomes with 7 Nodes
-    fitnessFunc: genome => -Math.abs(genome.nodeOrder.length - 7)
-  })
-
-  const p = Population.initPopulation(config)
-
-  p.advance(10)
-  console.log(p)
-}
-testNextGen()
+console.log(`Passed ${success_count}/${test_count} tests`)

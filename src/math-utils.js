@@ -1,3 +1,4 @@
+"use strict"
 // Gaussian random variable generator following the Marsaglia polar
 // method as outlined in "https://en.wikipedia.org/wiki/Marsaglia_polar_method"
 function gaussClosure() {

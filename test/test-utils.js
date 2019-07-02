@@ -1,3 +1,4 @@
+"use strict"
 let test_count    = 0
 let success_count = 0
 
