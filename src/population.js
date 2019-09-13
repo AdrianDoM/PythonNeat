@@ -110,7 +110,7 @@ class Population {
 
     // Prune empty species
     let emptyIndex
-    while ((emptyIndex = this.species.findIndex( species => species.genomes.length == 0)) >= 0)
+    while ((emptyIndex = this.species.findIndex( species => species.genomes.length == 0 )) >= 0)
       this.species.splice(emptyIndex, 1)
 
     this.updateFitness()
