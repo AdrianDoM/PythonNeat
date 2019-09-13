@@ -148,7 +148,7 @@ function testInitPopulation() {
 
   const tests = [
     p.species.length > 1, // Probably true
-    p.species.map( s => s.genomes.length).reduce( (a,b) => a + b, 0) == 10
+    p.species.map( s => s.genomes.length ).reduce( (a,b) => a + b, 0) == 10
   ]
 
   return testAllTrue(tests)
