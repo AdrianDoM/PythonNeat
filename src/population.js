@@ -17,21 +17,20 @@ class Population {
 
     // Create the Genomes and split them into Species, if necessary
     let newGenome  = Genome.basic(config.INPUT_NUM, config.OUTPUT_NUM)
-    let newSpecies = Species.fromGenome(newGenome)
-    newPopulation.species.push(newSpecies)
+    newPopulation.species.push( Species.fromGenome(newGenome) )
 
+    let compatibleSpecies
     for (let i = 1; i < config.POP_SIZE; ++i) {
       newGenome = Genome.basic(config.INPUT_NUM, config.OUTPUT_NUM)
 
+      compatibleSpecies = newPopulation.species.find( s => s.isCompatible(newGenome, config) )
       // Add to current Species if compatible
-      if (newSpecies.isCompatible(newGenome, config))
-        newSpecies.genomes.push(newGenome)
+      if (compatibleSpecies)
+        compatibleSpecies.genomes.push(newGenome)
 
       // Otherwise create a new Species
-      else {
-        newSpecies = Species.fromGenome(newGenome)
-        newPopulation.species.push(newSpecies)
-      }
+      else
+        newPopulation.species.push( Species.fromGenome(newGenome) )
     }
 
     newPopulation.availableIds.node = config.INPUT_NUM + config.OUTPUT_NUM
@@ -72,7 +71,9 @@ class Population {
   // Updates the fitness of each Species and Genome using the given
   // fitness function
   updateFitness() {
-    const newMaxFitness = Math.max(...this.species.map( species => species.computeFitness(config) ))
+    const newMaxFitness = Math.max(...this.species.map(
+      species => species.computeFitness(this.config) ))
+
     if (newMaxFitness <= this.maxFitness) ++this.stagnationCount
     else this.stagnationCount = 0
 

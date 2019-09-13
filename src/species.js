@@ -17,8 +17,10 @@ class Species {
     return newSpecies
   }
 
-  // Computes the fitness of each Genome and updates maxFitness and
-  // stagnationCount if necessary
+  // Computes the fitness of each Genome, updates maxFitness and
+  // stagnationCount if necessary and sorts genomes in order of 
+  // increasing fitness
+  // Returns the new maximum fitness of the species
   computeFitness(config) {
     let newMaxFitness = -Infinity
     let newSumFitness = 0

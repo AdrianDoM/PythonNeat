@@ -4,7 +4,7 @@ const config = new Config({
 })
 
 // TEST RANDOM INT GENERATOR
-function testRandInt() {
+;(function () {
   const randInts1 = []
   for (let i = 0; i < 10; ++i)
     randInts1.push(MathUtils.randInt(10, 20))
@@ -16,8 +16,7 @@ function testRandInt() {
   tests.push(randInts2.every( n => n === Math.floor(n) && -5 <= n && n < 5 ))
 
   return testAllTrue(tests, 'RANDOM INT GENERATOR')
-}
-testRandInt()
+})()
 
 // TEST BASIC GENOME FEED
 let g0 = Genome.basic(2,1)
@@ -26,7 +25,7 @@ g0.nodes[2].bias = 1
 testNumArrayEquals(g0.feed([1, 1], config), [1/(1 + Math.exp(-3))], 'BASIC GENOME FEED')
 
 // TEST ADD RANDOM NODE
-function testAddRandNode() {
+;(function () {
   const tests = [
     Mutators.addRandNode(g0, {node: g0.nodeOrder.length, link: g0.linkIds.length}, { node: [], link: [] }, config),
     g0.nodeOrder.length == 4,
@@ -43,11 +42,10 @@ function testAddRandNode() {
   tests.push(g0.links[oldLinkId].from == g0.links[newNode.incomingLinks[0]].from)
   
   return testAllTrue(tests, 'ADD RANDOM NODE')
-}
-testAddRandNode()
+})()
 
 // TEST CLONE GENOME
-function testCloneGenome() {
+;(function () {
   const g0 = Genome.basic(1,1)
   const g1 = g0.clone()
   Mutators.addRandNode(g1, {node: 2, link:1}, { node: [], link: [] }, config)
@@ -62,11 +60,10 @@ function testCloneGenome() {
   ]
   
   return testAllTrue(tests, 'CLONE GENOME')
-}
-testCloneGenome()
+})()
 
 // TEST COMPARE LINKS
-function testCompareLinks() {
+;(function () {
   const g1 = { linkIds: [1,2,5,6,8,9] }
   const g2 = { linkIds: [1,3,4,8,10] }
   const res = Genome.compareLinks(g1, g2)
@@ -84,11 +81,10 @@ function testCompareLinks() {
   ]
   
   return testAllTrue(tests, 'COMPARE LINKS')
-}
-testCompareLinks()
+})()
 
 // TEST MATE
-function testMate() {
+;(function () {
   const g1 = Genome.basic(2,1)
   const g2 = Genome.basic(2,1)
 
@@ -109,11 +105,10 @@ function testMate() {
   ]
 
   return testAllTrue(tests, 'MATE')
-}
-testMate()
+})()
 
 // TEST SPECIES FITNESS
-function testSpeciesFitness() {
+;(function () {
   const g1 = Genome.basic(1,1)
   const g2 = Genome.basic(3,3)
 
@@ -130,11 +125,10 @@ function testSpeciesFitness() {
   ]
 
   return testAllTrue(tests, 'SPECIES FITNESS')
-}
-testSpeciesFitness()
+})()
 
 // TEST INIT POPULATION
-function testInitPopulation() {
+;(function () {
   const config = new Config({
     INPUT_NUM: 3,
     OUTPUT_NUM: 2,
@@ -152,7 +146,11 @@ function testInitPopulation() {
   ]
 
   return testAllTrue(tests)
-}
-testInitPopulation()
+})()
+
+// TEST FITNESS (POPULATION WIDE)
+;(function () {
+  
+})()
 
 console.log(`Passed ${success_count}/${test_count} tests`)
