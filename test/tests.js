@@ -24,7 +24,7 @@ function testBasicGenomeFeed() {
   const g0 = Genome.basic(2,1)
   g0.links.forEach( link => link.weight = 1 )
   g0.nodes[2].bias = 1
-  testNumArrayEquals(g0.feed([1, 1], config), [1/(1 + Math.exp(-3))], 'BASIC GENOME FEED')
+  testNumArrayEquals(g0.feed([1, 1], 1), [1/(1 + Math.exp(-3))], 'BASIC GENOME FEED')
 }
 
 // TEST ADD RANDOM NODE
@@ -187,6 +187,6 @@ testCompareLinks()
 testMate()
 testSpeciesFitness()
 testInitPopulation()
-testBasicAdvance(15, 50)
+testBasicAdvance(15, 75)
 
 console.log(`Passed ${success_count}/${test_count} tests`)
