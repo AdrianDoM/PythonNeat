@@ -33,9 +33,12 @@ class Population {
         newPopulation.species.push( Species.fromGenome(newGenome) )
     }
 
+    // Initialise available id values for nodes and links
+    // (Assumes fully connected topology is used as initial one)
     newPopulation.availableIds.node = config.INPUT_NUM + config.OUTPUT_NUM
     newPopulation.availableIds.link = config.INPUT_NUM * config.OUTPUT_NUM
 
+    // Compute fitness
     newPopulation.updateFitness()
 
     return newPopulation

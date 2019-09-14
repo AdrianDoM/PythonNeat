@@ -150,7 +150,14 @@ testNumArrayEquals(g0.feed([1, 1], config), [1/(1 + Math.exp(-3))], 'BASIC GENOM
 
 // TEST FITNESS (POPULATION WIDE)
 ;(function () {
-  
+  const config = new Config({
+    INPUT_NUM: 3,
+    OUTPUT_NUM: 2,
+    POP_SIZE: 10,
+    species: {
+      WEIGHTS_COEFF: 3
+    }
+  })
 })()
 
 console.log(`Passed ${success_count}/${test_count} tests`)

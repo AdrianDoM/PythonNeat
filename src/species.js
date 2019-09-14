@@ -64,6 +64,8 @@ class Species {
     return dist <= config.species.MAX_COMP_DIST
   }
 
+  // Advance the Species one generation. This creates a new pool of Genomes which
+  // are offspring or mutations of the best performing old ones
   reproduce(population, availableIds, innovations, config) {
     // If the Species is big, clone the champion to the next generation
     if (this.genomes.length >= config.species.BIG_SPECIES)
@@ -86,8 +88,8 @@ class Species {
         let parent2
 
         if (population.species.length > 1 && Math.random() < config.species.INTERSPECIES_MATE_PROB) {
-          // Choose second parent to be the champion of a random species
-          // There is a probability that the outside Species is again the current one
+          // Choose second parent to be the champion of a random Species
+          // (There is a probability that the outside Species is again the current one)
           const outsideSpecies = population.species[MathUtils.randInt(population.species.length)]
           parent2 = outsideSpecies.genomes[0]
         }
