@@ -2,7 +2,7 @@
 let test_count    = 0
 let success_count = 0
 
-const eps = 1e-8
+const epsilon = 1e-8
 
 // Performs a TEST checking if the two provided objects are equal
 function testEquals(result, expected, test_name) {
@@ -16,15 +16,15 @@ function testEquals(result, expected, test_name) {
 }
 
 // Helper function to test if a Number if within epsilon of another
-Number.prototype.within = function(x) {
+Number.prototype.within = function(x, eps=epsilon) {
   return x - eps <= this && this <= x + eps
 }
 
 // Performs a TEST checking if the two provided Arrays of Numbers
 // are equal to within epsilon
-function testNumArrayEquals(result, expected, test_name) {
+function testNumArrayEquals(result, expected, test_name, eps=epsilon) {
   ++test_count
-  if (result.every( (res, i) => res.within(expected[i]) )) {
+  if (result.every( (res, i) => res.within(expected[i], eps) )) {
     ++success_count
     return true
   }

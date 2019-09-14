@@ -80,7 +80,7 @@ const Mutators = {
       const nodeIds = genome.nodeOrder.slice(0).sort( (a, b) => a - b )
 
       for (let i = TWEAK_POINT; i < genome.nodeOrder.length; ++i) {
-        const node = genome.links[nodeIds[i]]
+        const node = genome.nodes[nodeIds[i]]
         const choice = Math.random()
 
         if (i < SEVERE_POINT) {

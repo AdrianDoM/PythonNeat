@@ -26,9 +26,10 @@ class Species {
     let newSumFitness = 0
 
     for (const genome of this.genomes) {
-      genome.fitness = config.fitnessFunc(genome) / this.genomes.length
+      genome.fitness = config.fitnessFunc(genome)
+      genome.sharedFitness = genome.fitness / this.genomes.length
       if (genome.fitness > newMaxFitness) newMaxFitness = genome.fitness
-      newSumFitness += genome.fitness
+      newSumFitness += genome.sharedFitness
     }
 
     if (newMaxFitness <= this.maxFitness) ++this.stagnationCount

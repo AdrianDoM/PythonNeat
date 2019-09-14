@@ -6,10 +6,16 @@ class Config {
     this.OUTPUT_NUM = ('OUTPUT_NUM' in custom) ? custom.OUTPUT_NUM : 1
     this.POP_SIZE   = ('POP_SIZE' in custom)   ? custom.POP_SIZE   : 100
 
+    // Number of generations a Population must show no improvement for it
+    // to be considered stagnant, in which case only the top two Species
+    // are allowed to reproduce
     this.STAGNANT_POP = ('STAGNANT_POP' in custom) ? custom.STAGNANT_POP : 20
 
+    // Coefficient for the sigmoid function used in node activation
+    // TODO: support different activation functions
     this.SIGMOID_COEFF = ('SIGMOID_COEFF' in custom) ? custom.SIGMOID_COEFF : 4.9
 
+    // This object cantains the parameters for handling mutation of Genomes
     this.mutators = {
       MAX_TRIES:    10,  // Maximum number of tries to find a Link or Node to mutate
       BIG_GENOME:   10,  // Minimum size for a Genome to be considered big
@@ -37,6 +43,7 @@ class Config {
     if ('mutators' in custom)
       this.mutators = Object.assign(this.mutators, custom.mutators)
 
+    // This object contains the parameters for handling Species
     this.species = {
       EXCESS_COEFF:           1,   // These three coefficients are used to compute
       DISJOINT_COEFF:         1,   // the distance between two Genomes in order to
@@ -61,11 +68,16 @@ class Config {
     if ('species' in custom)
       this.species = Object.assign(this.species, custom.species)
 
+    // sizeFunc is used to calculate the size of a Genome. The default one will
+    // be enough for most traditional uses of the algorithm
     if ('sizeFunc' in custom)
       this.sizeFunc = custom.sizeFunc
     else
       this.sizeFunc = genome => genome.nodeOrder.length + genome.linkIds.length
 
+    // fitnessFunc is the fuction used to calculate the fitness of Genome, which
+    // it takes as its only argument. The value of this function must be positive
+    // for any Genome for NEAT to work properly
     if ('fitnessFunc' in custom)
       this.fitnessFunc = custom.fitnessFunc
     else

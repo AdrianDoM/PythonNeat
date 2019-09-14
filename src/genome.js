@@ -11,7 +11,8 @@ class Genome {
     this.inputNum  = 0
     this.outputNum = 0
 
-    this.fitness   = 0
+    this.fitness       = 0 // Individual fitness for this Genome
+    this.sharedFitness = 0 // Fitness scaled within the species
   }
 
   // Add the specified Link to this Genome

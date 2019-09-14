@@ -1,10 +1,11 @@
 "use strict"
 const config = new Config({
-  SIGMOID_COEFF: 1
+  SIGMOID_COEFF: 1,
+  fitnessFunc: genome => 0
 })
 
 // TEST RANDOM INT GENERATOR
-;(function () {
+function testRandomIntGenerator() {
   const randInts1 = []
   for (let i = 0; i < 10; ++i)
     randInts1.push(MathUtils.randInt(10, 20))
@@ -16,16 +17,19 @@ const config = new Config({
   tests.push(randInts2.every( n => n === Math.floor(n) && -5 <= n && n < 5 ))
 
   return testAllTrue(tests, 'RANDOM INT GENERATOR')
-})()
+}
 
 // TEST BASIC GENOME FEED
-let g0 = Genome.basic(2,1)
-g0.links.forEach( link => link.weight = 1 )
-g0.nodes[2].bias = 1
-testNumArrayEquals(g0.feed([1, 1], config), [1/(1 + Math.exp(-3))], 'BASIC GENOME FEED')
+function testBasicGenomeFeed() {
+  const g0 = Genome.basic(2,1)
+  g0.links.forEach( link => link.weight = 1 )
+  g0.nodes[2].bias = 1
+  testNumArrayEquals(g0.feed([1, 1], config), [1/(1 + Math.exp(-3))], 'BASIC GENOME FEED')
+}
 
 // TEST ADD RANDOM NODE
-;(function () {
+function testAddRandomNode() {
+  const g0 = Genome.basic(2,1)
   const tests = [
     Mutators.addRandNode(g0, {node: g0.nodeOrder.length, link: g0.linkIds.length}, { node: [], link: [] }, config),
     g0.nodeOrder.length == 4,
@@ -42,10 +46,10 @@ testNumArrayEquals(g0.feed([1, 1], config), [1/(1 + Math.exp(-3))], 'BASIC GENOM
   tests.push(g0.links[oldLinkId].from == g0.links[newNode.incomingLinks[0]].from)
   
   return testAllTrue(tests, 'ADD RANDOM NODE')
-})()
+}
 
 // TEST CLONE GENOME
-;(function () {
+function testCloneGenome() {
   const g0 = Genome.basic(1,1)
   const g1 = g0.clone()
   Mutators.addRandNode(g1, {node: 2, link:1}, { node: [], link: [] }, config)
@@ -60,10 +64,10 @@ testNumArrayEquals(g0.feed([1, 1], config), [1/(1 + Math.exp(-3))], 'BASIC GENOM
   ]
   
   return testAllTrue(tests, 'CLONE GENOME')
-})()
+}
 
 // TEST COMPARE LINKS
-;(function () {
+function testCompareLinks() {
   const g1 = { linkIds: [1,2,5,6,8,9] }
   const g2 = { linkIds: [1,3,4,8,10] }
   const res = Genome.compareLinks(g1, g2)
@@ -81,10 +85,10 @@ testNumArrayEquals(g0.feed([1, 1], config), [1/(1 + Math.exp(-3))], 'BASIC GENOM
   ]
   
   return testAllTrue(tests, 'COMPARE LINKS')
-})()
+}
 
 // TEST MATE
-;(function () {
+function testMate() {
   const g1 = Genome.basic(2,1)
   const g2 = Genome.basic(2,1)
 
@@ -105,10 +109,10 @@ testNumArrayEquals(g0.feed([1, 1], config), [1/(1 + Math.exp(-3))], 'BASIC GENOM
   ]
 
   return testAllTrue(tests, 'MATE')
-})()
+}
 
 // TEST SPECIES FITNESS
-;(function () {
+function testSpeciesFitness() {
   const g1 = Genome.basic(1,1)
   const g2 = Genome.basic(3,3)
 
@@ -120,22 +124,25 @@ testNumArrayEquals(g0.feed([1, 1], config), [1/(1 + Math.exp(-3))], 'BASIC GENOM
   const tests = [
     species.genomes[0] == g2,
     species.genomes[1] == g1,
-    g2.fitness == 3 * 3 / 2,
-    g1.fitness == 1 / 2
+    g2.fitness == 3 * 3,
+    g2.sharedFitness == 3 * 3 / 2,
+    g1.fitness == 1,
+    g1.sharedFitness == 1 / 2
   ]
 
   return testAllTrue(tests, 'SPECIES FITNESS')
-})()
+}
 
 // TEST INIT POPULATION
-;(function () {
+function testInitPopulation() {
   const config = new Config({
     INPUT_NUM: 3,
     OUTPUT_NUM: 2,
     POP_SIZE: 10,
     species: {
       WEIGHTS_COEFF: 3
-    }
+    },
+    fitnessFunc: genome => 0
   })
 
   const p = Population.initPopulation(config)
@@ -145,19 +152,41 @@ testNumArrayEquals(g0.feed([1, 1], config), [1/(1 + Math.exp(-3))], 'BASIC GENOM
     p.species.map( s => s.genomes.length ).reduce( (a,b) => a + b, 0) == 10
   ]
 
-  return testAllTrue(tests)
-})()
+  return testAllTrue(tests, 'INIT POPULATION')
+}
 
-// TEST FITNESS (POPULATION WIDE)
-;(function () {
+// TEST BASIC ADVANCE
+function testBasicAdvance(targetNodes, generations) {
   const config = new Config({
     INPUT_NUM: 3,
     OUTPUT_NUM: 2,
-    POP_SIZE: 10,
-    species: {
-      WEIGHTS_COEFF: 3
-    }
+    POP_SIZE: 50,
+    // We try to evolve Genomes with 8 Nodes
+    fitnessFunc: g => Math.exp(- ( (g.nodeOrder.length - targetNodes) **2 ) )
   })
-})()
+
+  const p = Population.initPopulation(config)
+
+  p.advance(generations)
+
+  let avg = 0
+  for (const s of p.species)
+    for (const g of s.genomes)
+      avg += g.nodeOrder.length
+  avg /= config.POP_SIZE
+
+  testNumArrayEquals([avg], [targetNodes], 'BASIC ADVANCE', 1)
+}
+
+// RUN ALL TESTS
+testRandomIntGenerator()
+testBasicGenomeFeed()
+testAddRandomNode()
+testCloneGenome()
+testCompareLinks()
+testMate()
+testSpeciesFitness()
+testInitPopulation()
+testBasicAdvance(15, 50)
 
 console.log(`Passed ${success_count}/${test_count} tests`)

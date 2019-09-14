@@ -45,18 +45,15 @@ class Population {
   }
 
   // Removes stagnant Species and assigns the number of offspring to the
-  // remaining Species. Species.computFitness() must have been called already
-  updateOffspringNum() {
+  // remaining Species. Species.computeFitness() must have been called already
+  updateOffspringNum(verbose=false) {
     let totalSumFitness = 0
     let sumFitnesses = []
-    for (let i = 0; i < this.species.length; ++i) {
-      // If the Species is stagnant, remove it
-      if (this.species[i].stagnationCount >= this.config.species.STAGNANT && this.species.length > 1)
-        this.species.splice(i, 1)
-      else {
-        sumFitnesses.push(this.species[i].sumFitness)
-        totalSumFitness += this.species[i].sumFitness
-      }
+
+    // Compute the fitness share of each species
+    for (const s of this.species) {
+      sumFitnesses.push(s.sumFitness)
+      totalSumFitness += s.sumFitness
     }
 
     // Compute the proportion of the offspring of each remaining Species
@@ -69,6 +66,8 @@ class Population {
       remainingOffspring -= this.species[i].offspringNum
     }
     this.species[this.species.length - 1].offspringNum = remainingOffspring
+
+    if (verbose) console.log('Allocated offspring distribution: ', this.species.map( s => s.offspringNum))
   }
 
   // Updates the fitness of each Species and Genome using the given
@@ -82,21 +81,39 @@ class Population {
 
     this.maxFitness = newMaxFitness
   }
-
+  
   // Transitions this Population into the next generation
   nextGen(verbose=false) {
-    // Otherwise, the Population is stagnant and only top 2 Species mate
+    ++this.generation
+    if (verbose) console.log(`Starting generation ${this.generation}.`)
+
+    // If the Population is stagnant only top 2 Species mate
     if (this.stagnationCount >= this.config.STAGNANT_POP) {
-      if (verbose) console.log('Stagnant population. Keeping top 2 Species')
       this.stagnationCount = 0
       // Sort species by maxFitness
       this.species.sort( (s1, s2) => s2.maxFitness - s1.maxFitness )
       // Keep only the top 2
       this.species = this.species.slice(0, 2)
+      if (verbose) {
+        console.log('Stagnant population. Keeping top 2 Species.')
+        console.log(`Remaining species distribution: `, this.species.map( s => s.genomes.length ))
+      }
+    }
+
+    // Remove stagnant species (unless only one remains)
+    let stagnantIndex
+    while (this.species.length > 1 && 0 <=
+      (stagnantIndex = this.species.findIndex( s => s.stagnationCount >= this.config.species.STAGNANT )))
+    {
+      this.species.splice(stagnantIndex, 1)
+      if (verbose) {
+        console.log(`Species ${stagnantIndex} is stangant. It will be removed.`)
+        console.log('Remaining species distribution: ', this.species.map( s => s.genomes.length ))
+      }
     }
 
     // Update the number of offspring each Species will have
-    this.updateOffspringNum()
+    this.updateOffspringNum(verbose)
 
     // Create the new Genomes
     this.species.forEach( species =>
@@ -114,23 +131,34 @@ class Population {
 
     // Prune empty species
     let emptyIndex
-    while ((emptyIndex = this.species.findIndex( species => species.genomes.length == 0 )) >= 0)
+    while ((emptyIndex = this.species.findIndex( s => s.genomes.length == 0 )) >= 0) {
       this.species.splice(emptyIndex, 1)
+      if (verbose) {
+        console.log(`Species ${emptyIndex} is empty. It will be removed.`)
+        console.log('Remaining species distribution: ', this.species.map( s => s.genomes.length ))
+      }
+    }
 
     this.updateFitness()
 
-    ++this.generation
-
     if (verbose) {
       console.log(`Gen ${this.generation} completed. Max. Fitness: ${this.maxFitness}`)
-      console.log(`Species distribution: `, this.species.map( s => s.genomes.length ))
+      console.log('Species distribution: ', this.species.map( s => s.genomes.length ))
+      console.log('\n')
     }
   }
 
   // Advances this population the given number of generations
-  advance(generationNum, verbose=false) {
-    while (generationNum-- > 0)
+  advance(generationNum, summary=false, verbose=false) {
+    let remainingGen = generationNum
+    while (remainingGen-- > 0)
       this.nextGen(verbose)
+
+    if (summary) {
+      console.log(`Advanced ${generationNum} generations. Now in generation ${this.generation}.`)
+      console.log(`Maximum fitness reached in the last generation: ${this.maxFitness}.`)
+      console.log('\n')
+    }
   }
 
 }
