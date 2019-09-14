@@ -72,7 +72,7 @@ class Genome {
   }
 
   // Activate a single node given its id and return the activation
-  activateNode(nodeId, config) {
+  activateNode(nodeId, coeff) {
     const node = this.nodes[nodeId]
     // In this sum, nothing special is done for recurrent Links.
     // These will always come from nodes that are activated later
@@ -86,22 +86,22 @@ class Genome {
     sum += node.bias
 
     // Inline sigmoid activation function
-    return node.activation = 1 / (1 + Math.exp(-config.SIGMOID_COEFF * sum))
+    return node.activation = 1 / (1 + Math.exp(-coeff * sum))
   }
 
   // Feed the given inputValues to the Neural Network, which is the
   // phenotype of this Genome (genotype and phenotype are kept together
   // for simplicity), and return its output
-  feed(inputValues, config) {
+  feed(inputValues, coeff=4.9) {
     for (let i = 0; i < this.inputNum; ++i) // for all inputs
       this.nodes[i].activation = inputValues[i]
 
     for (let h = this.inputNum; h < this.nodeOrder.length - this.outputNum; ++h)
-      this.activateNode(this.nodeOrder[h], config) // activate hidden in order
+      this.activateNode(this.nodeOrder[h], coeff) // activate hidden in order
 
     const outputValues = []
     for (let o = this.inputNum; o < this.inputNum + this.outputNum; ++o) // for all outputs
-      outputValues.push(this.activateNode(o, config))
+      outputValues.push(this.activateNode(o, coeff))
 
     return outputValues
   }

@@ -11,10 +11,6 @@ class Config {
     // are allowed to reproduce
     this.STAGNANT_POP = ('STAGNANT_POP' in custom) ? custom.STAGNANT_POP : 20
 
-    // Coefficient for the sigmoid function used in node activation
-    // TODO: support different activation functions
-    this.SIGMOID_COEFF = ('SIGMOID_COEFF' in custom) ? custom.SIGMOID_COEFF : 4.9
-
     // This object cantains the parameters for handling mutation of Genomes
     this.mutators = {
       MAX_TRIES:    10,  // Maximum number of tries to find a Link or Node to mutate
