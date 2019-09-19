@@ -137,9 +137,10 @@ const Mutators = {
       // Select random 'from' Node among inputs and hidden
       fromOrderIndex = MathUtils.randInt(0, genome.nodeOrder.length - genome.outputNum)
       from = genome.nodeOrder[fromOrderIndex]
+      
+      // Select random 'to' Node among hidden and outputs
       fromOrderIndex = (fromOrderIndex < genome.inputNum) ? genome.inputNum : fromOrderIndex + 1
 
-      // Select random 'to' Node among hidden and outputs
       toOrderIndex = MathUtils.randInt(fromOrderIndex, genome.nodeOrder.length)
       to = genome.nodeOrder[toOrderIndex]
 
@@ -176,18 +177,22 @@ const Mutators = {
   // Adds a random recurrent Link to the given Genome
   // Returns whether the Link could be added
   addRandRecurrentLink: function(genome, availableIds, innovations, config) {
+    // Cannot add a recurrent Link to Genomes with no hidden Nodes
+    if (genome.nodeOrder == genome.inputNum + genome.outputNum) return false
+
     let tries = 0
     let found = false
     let fromOrderIndex, from, toOrderIndex, to
 
     while (!found && tries++ < config.mutators.MAX_TRIES) {
       // Select random 'from' Node among hidden and outputs
-      fromOrderIndex = MathUtils.randInt(genome.inputNum + 1, genome.nodeOrder.length)
+      fromOrderIndex = MathUtils.randInt(genome.inputNum, genome.nodeOrder.length)
       from = genome.nodeOrder[fromOrderIndex]
+      
+      // Select random 'to' Node among hidden
       if (fromOrderIndex >= genome.nodeOrder.length - genome.outputNum)
         fromOrderIndex = genome.nodeOrder.length - genome.outputNum
-
-      // Select random 'to' Node among hidden
+      
       toOrderIndex = MathUtils.randInt(genome.inputNum, fromOrderIndex)
       to = genome.nodeOrder[toOrderIndex]
 
@@ -216,7 +221,7 @@ const Mutators = {
       (innovations.link[from] = [])[to] = id
     }
 
-    genome.addLink(id, from, to)
+    genome.addLink(id, from, to, true)
 
     return true
   },

@@ -16,4 +16,4 @@ const config = new Config({
 
 const pop = Population.initPopulation(config)
 console.log(pop)
-pop.advance(100, true, true)
+pop.advance(50, true)
