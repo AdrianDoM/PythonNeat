@@ -159,13 +159,20 @@ class Population {
   }
 
   // Advances this population the given number of generations
-  advance(generationNum, summary=false, verbose=false) {
-    let remainingGen = generationNum
-    while (remainingGen-- > 0)
+  advance(generationNum, targetFitness, summary, verbose) {
+    let completedGenerations = 0, targetReached
+    while (completedGenerations < generationNum) {
       this.nextGen(verbose)
+      completedGenerations++
+      if (this.maxFitness >= targetFitness) {
+        targetReached = true
+        break
+      }
+    }
 
     if (summary) {
-      console.log(`Advanced ${generationNum} generations. Now in generation ${this.generation}.`)
+      if (targetReached) console.log('Target fitness was reached. Stopping early.')
+      console.log(`Advanced ${completedGenerations} generations. Now in generation ${this.generation}.`)
       console.log(`Maximum fitness reached in the last generation: ${this.maxFitness}.`)
       console.log('\n')
     }
