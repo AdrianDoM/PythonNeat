@@ -1,18 +1,22 @@
 "use strict"
 class Species {
 
-  constructor() {
-    this.genomes = []
-    this.newGenomes = []
-    this.maxFitness = -Infinity
-    this.sumFitness = -Infinity
+  constructor(speciesId) {
+    this.id              = speciesId
+
+    this.genomes         = []
+    this.newGenomes      = []
+
+    this.maxFitness      = -Infinity
+    this.sumFitness      = -Infinity
+
     this.stagnationCount = 0
-    this.offspringNum = 0
+    this.offspringNum    = 0
   }
 
   // Returns a new Species with the given Genome only
-  static fromGenome(genome) {
-    const newSpecies = new Species()
+  static fromGenome(genome, speciesId) {
+    const newSpecies = new Species(speciesId)
     newSpecies.genomes.push(genome)
     return newSpecies
   }
@@ -168,7 +172,7 @@ class Species {
 
         // If no existing Species was found we must create a new one
         if (!found) {
-          const newSpecies = Species.fromGenome(baby)
+          const newSpecies = Species.fromGenome(baby, availableIds.species++)
           population.newSpecies.push(newSpecies)
         }
       }

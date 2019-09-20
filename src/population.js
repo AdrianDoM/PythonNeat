@@ -5,11 +5,16 @@ class Population {
     this.species         = [] // List of species, each species is a list of Genomes
     this.newSpecies      = []
     this.innovations     = { node: [], link: [] }
-    this.availableIds    = { node:  0, link:  0 }
+    this.availableIds    = { node:  0, link:  0, species: 0 }
     this.generation      = 0
     this.config          = config
     this.maxFitness      = -Infinity
     this.stagnationCount = 0
+
+    this.summary = { // Object summarizing the history of this population
+      maxFitnessHistory            : [],
+      speciesDistributionHitory : []
+    }
   }
 
   static initPopulation(config) {
@@ -17,7 +22,7 @@ class Population {
 
     // Create the Genomes and split them into Species, if necessary
     let newGenome  = Genome.basic(config.INPUT_NUM, config.OUTPUT_NUM)
-    newPopulation.species.push( Species.fromGenome(newGenome) )
+    newPopulation.species.push( Species.fromGenome(newGenome, newPopulation.availableIds.species++) )
 
     let compatibleSpecies
     for (let i = 1; i < config.POP_SIZE; ++i) {
@@ -30,7 +35,7 @@ class Population {
 
       // Otherwise create a new Species
       else
-        newPopulation.species.push( Species.fromGenome(newGenome) )
+        newPopulation.species.push( Species.fromGenome(newGenome, newPopulation.availableIds.species++) )
     }
 
     // Initialise available id values for nodes and links
@@ -40,6 +45,9 @@ class Population {
 
     // Compute fitness
     newPopulation.updateFitness()
+
+    // Update summary
+    newPopulation.updateSummary()
 
     return newPopulation
   }
@@ -141,6 +149,8 @@ class Population {
 
     this.updateFitness()
 
+    this.updateSummary()
+
     if (verbose) {
       console.log(`Gen ${this.generation} completed. Max. Fitness: ${this.maxFitness}`)
       console.log('Species distribution: ', this.species.map( s => s.genomes.length ))
@@ -159,6 +169,17 @@ class Population {
       console.log(`Maximum fitness reached in the last generation: ${this.maxFitness}.`)
       console.log('\n')
     }
+  }
+
+  updateSummary() {
+    this.summary.maxFitnessHistory.push( this.maxFitness )
+
+    const speciesDistro = []
+    for (let i = 0; i < this.availableIds.species; ++i) {
+      const s = this.species.find( s => s.id == i )
+      speciesDistro[i] = s ? s.genomes.length : 0
+    }
+    this.summary.speciesDistributionHitory.push(speciesDistro)
   }
 
 }
