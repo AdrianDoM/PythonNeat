@@ -18,6 +18,8 @@ const pop = Population.initPopulation(config)
 console.log(pop)
 pop.advance(500, 0.95, true)
 
+console.log(pop.getChampion())
+
 const data = pop.summary.maxFitnessHistory
 
 // set the dimensions and margins of the graph

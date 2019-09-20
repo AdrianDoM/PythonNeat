@@ -8,6 +8,8 @@ class Population {
     this.availableIds    = { node:  0, link:  0, species: 0 }
     this.generation      = 0
     this.config          = config
+
+    this.championSpecies = null
     this.maxFitness      = -Infinity
     this.stagnationCount = 0
 
@@ -81,12 +83,19 @@ class Population {
   // Updates the fitness of each Species and Genome using the given
   // fitness function
   updateFitness() {
-    const newMaxFitness = Math.max(...this.species.map(
-      species => species.computeFitness(this.config) ))
+    let newChampionSpecies = null, 
+      newMaxFitness = -Infinity
+    
+    for (const species of this.species)
+      if (species.computeFitness(this.config) > newMaxFitness) {
+        newChampionSpecies = species
+        newMaxFitness = species.maxFitness
+    }
 
     if (newMaxFitness <= this.maxFitness) ++this.stagnationCount
     else this.stagnationCount = 0
 
+    this.championSpecies = newChampionSpecies
     this.maxFitness = newMaxFitness
   }
   
@@ -187,6 +196,10 @@ class Population {
       speciesDistro[i] = s ? s.genomes.length : 0
     }
     this.summary.speciesDistributionHitory.push(speciesDistro)
+  }
+
+  getChampion() {
+    return this.championSpecies.champion
   }
 
 }

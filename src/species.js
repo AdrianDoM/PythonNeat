@@ -7,6 +7,7 @@ class Species {
     this.genomes         = []
     this.newGenomes      = []
 
+    this.champion        = null
     this.maxFitness      = -Infinity
     this.sumFitness      = -Infinity
 
@@ -26,19 +27,24 @@ class Species {
   // increasing fitness
   // Returns the new maximum fitness of the species
   computeFitness(config) {
-    let newMaxFitness = -Infinity
-    let newSumFitness = 0
+    let newChampion   = null,
+      newMaxFitness = -Infinity,
+      newSumFitness = 0
 
     for (const genome of this.genomes) {
       genome.fitness = config.fitnessFunc(genome)
       genome.sharedFitness = genome.fitness / this.genomes.length
-      if (genome.fitness > newMaxFitness) newMaxFitness = genome.fitness
+      if (genome.fitness > newMaxFitness) {
+        newChampion = genome
+        newMaxFitness = genome.fitness
+      }
       newSumFitness += genome.sharedFitness
     }
 
     if (newMaxFitness <= this.maxFitness) ++this.stagnationCount
     else this.stagnationCount = 0
 
+    this.champion   = newChampion
     this.maxFitness = newMaxFitness
     this.sumFitness = newSumFitness
 
