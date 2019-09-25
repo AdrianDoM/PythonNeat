@@ -18,7 +18,7 @@ class Genome {
   // Add the specified Link to this Genome
   // Takes care of setting connections to end Nodes
   addLink(linkId, from, to, isRecurrent, isEnabled, weight) {
-    const newLink = new Link(linkId, from, to, isRecurrent, weight)
+    const newLink = new Link(linkId, from, to, isRecurrent, isEnabled, weight)
     this.links[linkId] = newLink
     this.linkIds.push(linkId)
 
