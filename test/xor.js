@@ -5,7 +5,8 @@ const config = new Config({
   OUTPUT_NUM: 1,
   POP_SIZE: 100,
   mutators: {
-    BIG_GENOME: 1
+    BIG_GENOME: 1,
+    RAND_REC_LINK_PROB: 0
   },
   fitnessFunc: g => {
     const sumSqDist = (g.feed([0,0]) - 0)**2 + (g.feed([0,1]) - 1)**2 +
