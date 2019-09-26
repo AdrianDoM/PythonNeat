@@ -68,10 +68,10 @@ class NNDiagram {
       for (let i = thisDiagram.shapes.length - 1; i >= 0; --i)
         if (thisDiagram.shapes[i].contains(mouse.x, mouse.y)) {
           // Stop hovering if there was another one
-          if (thisDiagram.hovered) thisDiagram.hovered.isHovered = false
+          if (thisDiagram.hovered) thisDiagram.hovered.setHover(false)
           // Set new hovered shape
           const shape = thisDiagram.shapes[i]
-          shape.isHovered = true
+          shape.setHover(true)
           thisDiagram.hovered = shape
           thisDiagram.draw()
           return
@@ -79,7 +79,7 @@ class NNDiagram {
 
       // If nothing is hovered, reset
       if (thisDiagram.hovered) {
-        thisDiagram.hovered.isHovered = false
+        thisDiagram.hovered.setHover(false)
         thisDiagram.hovered = null
         thisDiagram.draw()
         return
@@ -255,6 +255,12 @@ class NodeShape {
     return 1 >= (dx * dx + dy * dy) / r2
   }
 
+  setHover(value) {
+    this.isHovered = value
+    this.incoming.forEach( l => l.isHovered = value )
+    this.outgoing.forEach( l => l.isHovered = value )
+  }
+
 }
 
 class LinkShape {
@@ -307,6 +313,12 @@ class LinkShape {
     const dx = t * this.ABx - AXx, dy = t * this.ABy - AXy
 
     return 1 >= (dx * dx + dy * dy) / r2
+  }
+
+  setHover(value) {
+    this.isHovered      = value
+    this.from.isHovered = value
+    this.to.isHovered   = value
   }
 
 }
