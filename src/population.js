@@ -199,7 +199,8 @@ class Population {
   }
 
   getChampion() {
-    return this.championSpecies.champion
+    const champion = this.championSpecies.champion
+    return champion
   }
 
 }

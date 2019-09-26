@@ -16,9 +16,9 @@ const config = new Config({
 })
 
 const pop = Population.initPopulation(config)
-console.log(pop)
 pop.advance(500, 0.95, true)
 
+const champion = pop.getChampion()
 console.log(pop.getChampion())
 
 const data = pop.summary.maxFitnessHistory
@@ -62,3 +62,6 @@ svg.append("path")
     .x( x )
     .y( i => y(data[i]) )
   )
+
+const canvas = document.getElementById('diagram')
+const diagram = new NNDiagram(champion, canvas, 'autoWidth')

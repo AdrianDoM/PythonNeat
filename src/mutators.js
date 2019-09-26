@@ -103,7 +103,7 @@ const Mutators = {
 
   // Select a random Link in the given genome and toggle its isEnabled
   // property. When disabling a Link, we first check if doing so would
-  // lead to a Node having no outgoing Link (redering it useless)
+  // lead to a Node having no outgoing Link (rendering it useless)
   toggleEnable: function(genome) {
     const linkId = genome.linkIds[MathUtils.randInt(genome.linkIds.length)]
     const link = genome.links[linkId]
