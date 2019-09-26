@@ -21,7 +21,34 @@ class NNDiagram {
     this.htmlLeft = html.offsetLeft
 
     this.shapes  = []
-    this.hovered   = null
+    this.hovered = null
+
+    this.style = {
+      node: {
+        //             INPUT      HIDDEN     OUTPUT
+        fill:        ['#326489', '#94BABA', '#F4B41F'],
+        stroke:      ['#162C3D', '#576D6D', '#A87C15'],
+
+        rProportion: 0.5,
+        hoveredRProportion: 1.1,
+        lineWidthProportion: 0.2,
+
+        r: 20,
+        hoveredR: 22,
+        lineWidth: 4
+      },
+
+      link: {
+        stroke: '#7E878C',
+        hoveredStroke: '#676f73',
+
+        lineWidthProportion: 0.5,
+        hoveredLineWidthProportion: 1.5,
+
+        lineWidth: 3,
+        hoveredLineWidth: 4
+      }
+    }
 
     const thisDiagram = this
 
@@ -65,62 +92,81 @@ class NNDiagram {
   }
 
   createShapes(fitMode) {
-    const g = this.genome, nodeShapes = [], linkShapes = [],
-    yc = this.height / 2, hiddenN = g.nodeOrder.length - g.inputNum - g.outputNum
+    const g = this.genome, hiddenN = g.nodeOrder.length - g.inputNum - g.outputNum,
+    maxLayer = Math.max(g.inputNum, g.outputNum)
+    let dy, dx
 
     switch (fitMode) {
-    
       case 'autoWidth':
-        const r = this.height / (3 * Math.max(g.inputNum, g.outputNum) + 1) 
-        let node, ic, x, y
+        dy = this.height / (2 * maxLayer)
+        dx = dy
 
-        // Create input layer Nodes
-        ic = (g.inputNum - 1) / 2
-        x = 2 * r
-        for (let i = 0; i < g.inputNum; ++i) {
-          node = g.nodes[i]
-          y = yc + (i - ic) * 3 * r
-          nodeShapes.push(new NodeShape(x, y, node.nType, node.id, node.activation, 0))
-        }
-
-        // Create output layer Nodes
-        x = ((hiddenN + 2) * 3 - 1) * r
-        ic = (g.outputNum - 1) / 2
-        for (let i = 0; i < g.outputNum; ++i) {
-          node = g.nodes[i + g.inputNum]
-          y = yc + (i - ic) * 3 * r
-          nodeShapes.push(new NodeShape(x, y, node.nType, node.id, node.activation, node.bias))
-        }
-
-        // Create hidden Nodes
-        x = 5 * r
-        let incomingYs
-        for (let i = 0; i < hiddenN; ++i) {
-          node = g.nodes[i + g.inputNum + g.outputNum]
-          incomingYs = node.incomingLinks
-            .map( id => g.links[id] )
-            .filter( link => !link.isRecurrent && link.isEnabled )
-            .map( link => nodeShapes[link.from].y )
-
-          if (incomingYs.length == 0) 
-            y = yc
-          else
-            y = incomingYs.reduce( (acc, v) => acc + v ) / incomingYs.length
-          
-          nodeShapes[node.id] = new NodeShape(x, y, node.nType, node.id, node.activation, node.bias)
-        }
-
+        this.width = (hiddenN + 2) * 2 * dx
+        this.canvas.width = this.width
         break
       
       case 'autoHeight':
-        // TODO:
+        dx = this.width / ((hiddenN + 2) * 2)
+        dy = dx
+
+        this.height = maxLayer * 2 * dy
+        this.canvas.height = this.height
         break
 
       case 'fixed':
-        // TODO:
+        dy = this.height / (2 * maxLayer)
+        dx = this.width / ((hiddenN + 2) * 2)
     }
 
-    console.log(nodeShapes)
+    const nodeShapes = [], linkShapes = [],
+    yc = this.height / 2, r = Math.min(dx, dy)
+    let node, ic, x, y
+
+    const nS = this.style.node, lS = this.style.link
+    nS.r = r * nS.rProportion
+    nS.hoveredR = nS.r * nS.hoveredRProportion
+    nS.lineWidth = nS.r * nS.lineWidthProportion
+
+    lS.lineWidth = nS.lineWidth * lS.lineWidthProportion
+    lS.hoveredLineWidth = lS.lineWidth * lS.hoveredLineWidthProportion
+
+    // Create input layer Nodes
+    ic = g.inputNum / 2
+    x = dx
+    for (let i = 0; i < g.inputNum; ++i) {
+      node = g.nodes[i]
+      y = yc + ((i - ic) * 2 + 1) * dy
+      nodeShapes.push(new NodeShape(x, y, this.style.node, node.nType, node.id, node.activation, 0))
+    }
+
+    // Create output layer Nodes
+    x = ((hiddenN + 1) * 2 + 1) * dx
+    ic = g.outputNum / 2
+    for (let i = 0; i < g.outputNum; ++i) {
+      node = g.nodes[i + g.inputNum]
+      y = yc + ((i - ic) * 2 + 1) * dy
+      nodeShapes.push(new NodeShape(x, y, this.style.node, node.nType, node.id, node.activation, node.bias))
+    }
+
+    // Create hidden Nodes
+    x = 3 * dx
+    let incomingYs
+    for (let i = 0; i < hiddenN; ++i) {
+      node = g.nodes[i + g.inputNum + g.outputNum]
+      incomingYs = node.incomingLinks
+        .map( id => g.links[id] )
+        .filter( link => !link.isRecurrent && link.isEnabled )
+        .map( link => nodeShapes[link.from].y )
+
+      if (incomingYs.length == 0) 
+        y = yc
+      else
+        y = incomingYs.reduce( (acc, v) => acc + v ) / incomingYs.length
+      
+      nodeShapes[node.id] = new NodeShape(x, y, this.style.node, node.nType, node.id, node.activation, node.bias)
+
+      x += 2 * dx
+    }
 
     // Create the Links
     let nfrom, nto
@@ -128,7 +174,7 @@ class NNDiagram {
       if (!link.isEnabled || link.isRecurrent) continue // TODO: support recurrent links
       nfrom = nodeShapes[link.from]
       nto   = nodeShapes[link.to]
-      linkShapes.push(new LinkShape(nfrom, nto, link.id, link.weight))
+      linkShapes.push(new LinkShape(nfrom, nto, this.style.link, link.id, link.weight))
     }
 
     // Add new shapes
@@ -168,9 +214,10 @@ class NNDiagram {
 
 class NodeShape {
 
-  constructor(x, y, type, id, activation, bias, incoming=[], outgoing=[]) {
+  constructor(x, y, style, type, id, activation, bias, incoming=[], outgoing=[]) {
     this.x          = x
     this.y          = y
+    this.style      = style
     this.type       = type
     this.incoming   = incoming
     this.outgoing   = outgoing
@@ -181,39 +228,28 @@ class NodeShape {
     if (type != 0) this.bias = bias
   }
 
-  static get style() {
-    return {
-      //             INPUT      HIDDEN     OUTPUT
-      fill:        ['#326489', '#94BABA', '#F4B41F'],
-      stroke:      ['#162C3D', '#576D6D', '#A87C15'],
-      r: 20,
-      hoveredR: 22,
-      lineWidth: 4
-    }
-  }
+  draw(ctx, style) {
+    const r = (this.isHovered) ? this.style.hoveredR : this.style.r
 
-  draw(ctx) {
-    const r = (this.isHovered) ? NodeShape.style.hoveredR : NodeShape.style.r
-
-    ctx.fillStyle = NodeShape.style.fill[this.type]
+    ctx.fillStyle = this.style.fill[this.type]
     ctx.beginPath()
     ctx.arc(this.x, this.y, r, 0, 2 * Math.PI, true)
     ctx.fill()
 
-    ctx.lineWidth = NodeShape.style.lineWidth
-    ctx.strokeStyle = NodeShape.style.stroke[this.type]
+    ctx.lineWidth   = this.style.lineWidth
+    ctx.strokeStyle = this.style.stroke[this.type]
     ctx.beginPath()
     ctx.arc(this.x, this.y, r, 0, 2 * Math.PI, true)
     ctx.stroke()
   }
 
-  drawHover(ctx) {
+  drawHover(ctx, style) {
     return
   }
 
-  contains(x, y) {
-    const innerR = (this.isHovered) ? NodeShape.style.hoveredR : NodeShape.style.r
-    const r = (innerR + NodeShape.style.lineWidth / 2), r2 = r * r,
+  contains(x, y, style) {
+    const innerR = (this.isHovered) ? this.style.hoveredR : this.style.r
+    const r = (innerR + this.style.lineWidth / 2), r2 = r * r,
     dx = this.x - x, dy = this.y - y
 
     return 1 >= (dx * dx + dy * dy) / r2
@@ -223,16 +259,17 @@ class NodeShape {
 
 class LinkShape {
 
-  constructor(from, to, id, weight) {
+  constructor(from, to, style, id, weight) {
     this.from    = from
     from.outgoing.push(this)
 
     this.to      = to
     to.incoming.push(this)
 
+    this.style     = style
     this.isHovered = false
-    this.id      = id
-    this.weight  = weight
+    this.id        = id
+    this.weight    = weight
 
     // For prompt computation of contains()
     this.ABx = to.x - from.x
@@ -240,22 +277,13 @@ class LinkShape {
     this.AB2 = this.ABx * this.ABx + this.ABy * this.ABy
   }
 
-  static get style() {
-    return {
-      stroke: '#7E878C',
-      hoveredStroke: '#676f73',
-      lineWidth: 3,
-      hoveredLineWidth: 4
-    }
-  }
-
-  draw(ctx) {
+  draw(ctx, style) {
     if (this.isHovered) {
-      ctx.lineWidth   = LinkShape.style.hoveredLineWidth
-      ctx.strokeStyle = LinkShape.style.hoveredStroke
+      ctx.lineWidth   = this.style.hoveredLineWidth
+      ctx.strokeStyle = this.style.hoveredStroke
     } else {
-      ctx.lineWidth   = LinkShape.style.lineWidth
-      ctx.strokeStyle = LinkShape.style.stroke
+      ctx.lineWidth   = this.style.lineWidth
+      ctx.strokeStyle = this.style.stroke
     }
 
     ctx.beginPath()
@@ -264,12 +292,12 @@ class LinkShape {
     ctx.stroke()
   }
 
-  drawHover() {
+  drawHover(ctx, style) {
     return
   }
 
   contains(x, y) {
-    const r = ((this.isHovered) ? LinkShape.style.hoveredLineWidth : LinkShape.style.lineWidth) / 2,
+    const r = ((this.isHovered) ? this.style.hoveredLineWidth : this.style.lineWidth) / 2,
     r2 = r * r,
     AXx = x - this.from.x, AXy = y - this.from.y
 
