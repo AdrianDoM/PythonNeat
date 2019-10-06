@@ -140,7 +140,7 @@ class NNDiagram {
       nodeShapes.push(new NodeShape(x, y, this.style.node, node.nType, node.id, node.activation, 0))
     }
 
-    // Create output layer Nodes
+    // Create output layer Nodes TODO: Fix for minimized genome (possibly add new method)
     x = ((hiddenN + 1) * 2 + 1) * dx
     ic = g.outputNum / 2
     for (let i = 0; i < g.outputNum; ++i) {

@@ -5,7 +5,7 @@ class Genome {
   constructor() {
     this.nodeOrder = [] // Node ids ordered for activation
     this.nodes     = [] // Nodes indexed by their id
-    this.linkIds   = [] // Link ids (naturally ordered)
+    this.linkIds   = [] // Link ids (naturally ordered - last added last)
     this.links     = [] // Links indexed by their id
     
     this.inputNum  = 0
@@ -148,6 +148,52 @@ class Genome {
       res.excess2.push(genome2.linkIds[j++])
 
     return res
+  }
+
+  // Returns a new Genome where Node and Link ids are naturally assigned and which
+  // increases performance of the network methods. This new Genome is not to be used
+  // in the genetic algorithm anymore.
+  minimize() {
+    const newGenome = new Genome()
+
+    newGenome.inputNum  = this.inputNum
+    newGenome.outputNum = this.outputNum
+    newGenome.fitness   = this.fitness
+
+    for (let i = 0; i < this.nodeOrder.length; ++i) {
+      
+    }
+    
+    // First we add the Nodes with their new ids
+    const newId = [] // Indexed by old id, gives new id
+    let oldNode, newNode
+    for (let i = 0; i < this.nodeOrder.length; ++i) {
+      oldNode = this.nodes[this.nodeOrder[i]]
+      newId[oldNode.id] = i // Store the new index
+
+      newNode = new Node(oldNode.nType, i, [], oldNode.bias)
+      newGenome.nodeOrder.push(i)
+      newGenome.nodes.push(newNode)
+    }
+
+    // Then we add the Links updating their ids
+    // Links evaluated later in the feed forward process have higher ids
+    let oldLink, id = 0
+    for (let i = this.inputNum; i < this.nodeOrder.length; ++i) {
+      oldNode = this.nodes[this.nodeOrder[i]]
+
+      for (const linkId of oldNode.incomingLinks) {
+        oldLink = this.links[linkId]
+
+        // Keep only enabled Links
+        if (!oldLink.isEnabled) continue
+
+        newGenome.addLink(id++, newId[oldLink.from], newId[oldLink.to],
+          oldLink.isRecurrent, true, oldLink.weight)
+      }
+    }
+
+    return newGenome
   }
 
 }

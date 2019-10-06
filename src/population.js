@@ -186,13 +186,15 @@ class Population {
         break
       }
     }
-
+    
     if (summary) {
       if (targetReached) console.log('Target fitness was reached. Stopping early.')
       console.log(`Advanced ${completedGenerations} generations. Now in generation ${this.generation}.`)
       console.log(`Maximum fitness reached in the last generation: ${this.maxFitness}.`)
       console.log('\n')
     }
+
+    if (targetReached) return this.getChampion()
   }
 
   updateSummary() {

@@ -4,7 +4,7 @@ const config = new Config({
   INPUT_NUM: 2,
   OUTPUT_NUM: 1,
   POP_SIZE: 100,
-  FLUSH_INNOVATIONS: false,
+  FLUSH_INNOVATIONS: true,
   mutators: {
     BIG_GENOME: 1,
     RAND_REC_LINK_PROB: 0
@@ -17,10 +17,7 @@ const config = new Config({
 })
 
 const pop = Population.initPopulation(config)
-pop.advance(500, 0.95, true)
-
-const champion = pop.getChampion()
-console.log(pop.getChampion())
+const champion = pop.advance(500, 0.95, true)
 
 const data = pop.summary.maxFitnessHistory
 
@@ -64,5 +61,37 @@ svg.append("path")
     .y( i => y(data[i]) )
   )
 
-const canvas = document.getElementById('diagram')
-const diagram = new NNDiagram(champion, canvas, 'autoWidth')
+let canvas1, diagram1, canvas2, diagram2, mChampion
+if (champion) {
+  canvas1  = document.getElementById('championDiagram')
+  diagram1 = new NNDiagram(champion, canvas1, 'autoWidth')
+
+  mChampion = champion.minimize()
+  console.log(champion)
+  console.log(mChampion)
+  
+  canvas2   = document.getElementById('mChampionDiagram')
+  diagram2  = new NNDiagram(mChampion, canvas2, 'autoWidth')
+
+}
+
+// const genNum = []
+// let pop, targetFitness = 0.95, maxGen = 800, total = 0, tries = 50
+// for (let i = 0; i < tries; ++i) {
+//   pop = Population.initPopulation(config)
+//   pop.advance(maxGen, targetFitness, false, false)
+//   genNum.push(pop.generation)
+//   total += pop.generation
+//   if (i % 5 == 0) console.log('Finished try #' + i)
+// }
+
+// function median(arr) {
+//   const sorted = arr.sort( (a,b) => a - b )
+//   if (arr.length % 2 == 1)
+//     return sorted[Math.floor(arr.length / 2)]
+//   else
+//     return (sorted[arr.length / 2] + sorted[arr.length / 2 - 1]) / 2
+// }
+
+// console.log(`Average number of generations ${total/tries}`)
+// console.log(`Median number of generations ${median(genNum)}`)
