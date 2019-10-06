@@ -5,6 +5,8 @@ class Config {
     this.INPUT_NUM  = ('INPUT_NUM' in custom)  ? custom.INPUT_NUM  : 1
     this.OUTPUT_NUM = ('OUTPUT_NUM' in custom) ? custom.OUTPUT_NUM : 1
     this.POP_SIZE   = ('POP_SIZE' in custom)   ? custom.POP_SIZE   : 100
+    
+    this.FLUSH_INNOVATIONS = ('FLUSH_INNOVATIONS' in custom) ? custom.FLUSH_INNOVATIONS : false
 
     // Number of generations a Population must show no improvement for it
     // to be considered stagnant, in which case only the top two Species

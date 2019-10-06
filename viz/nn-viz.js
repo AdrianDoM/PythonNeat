@@ -96,6 +96,7 @@ class NNDiagram {
     maxLayer = Math.max(g.inputNum, g.outputNum)
     let dy, dx
 
+    // Handle different fit modes
     switch (fitMode) {
       case 'autoWidth':
         dy = this.height / (2 * maxLayer)
@@ -118,7 +119,7 @@ class NNDiagram {
         dx = this.width / ((hiddenN + 2) * 2)
     }
 
-    const nodeShapes = [], linkShapes = [],
+    let nodeShapes = [], linkShapes = [],
     yc = this.height / 2, r = Math.min(dx, dy)
     let node, ic, x, y
 
@@ -152,7 +153,7 @@ class NNDiagram {
     x = 3 * dx
     let incomingYs
     for (let i = 0; i < hiddenN; ++i) {
-      node = g.nodes[i + g.inputNum + g.outputNum]
+      node = g.nodes[ g.nodeOrder[i + g.inputNum] ]
       incomingYs = node.incomingLinks
         .map( id => g.links[id] )
         .filter( link => !link.isRecurrent && link.isEnabled )
@@ -169,13 +170,17 @@ class NNDiagram {
     }
 
     // Create the Links
-    let nfrom, nto
-    for (const link of g.links) {
+    let link, nfrom, nto
+    for (const linkId of g.linkIds) {
+      link = g.links[linkId]
       if (!link.isEnabled || link.isRecurrent) continue // TODO: support recurrent links
       nfrom = nodeShapes[link.from]
       nto   = nodeShapes[link.to]
       linkShapes.push(new LinkShape(nfrom, nto, this.style.link, link.id, link.weight))
     }
+
+    // Prune empty slots in nodeShapes
+    nodeShapes = nodeShapes.filter( n => n != undefined )
 
     // Add new shapes
     this.shapes.push(...linkShapes)

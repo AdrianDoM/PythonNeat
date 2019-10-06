@@ -243,13 +243,14 @@ const Mutators = {
 
       // Check if oldLink is enabled and not recurrent
       found = oldLink.isEnabled && !oldLink.isRecurrent
+
+      // Also check that oldLink was not split before in this genome
+      if (oldLinkId in innovations.node)
+        found = found && !(innovations.node[oldLinkId].id in genome.nodes)
     }
 
     // Stop if no suitable Link was found
     if (!found) return false
-
-    // If a Link was found, disable it and create the new Links and Node
-    oldLink.isEnabled = false
 
     const from = oldLink.from
     const to   = oldLink.to
@@ -268,6 +269,9 @@ const Mutators = {
       rightId = availableIds.link++
       innovations.node[oldLinkId] = {id, leftId, rightId}
     }
+
+    // Disable the old Link and create the new Links and Node
+    oldLink.isEnabled = false
 
     // The new Node will be positioned as close as possible to oldLink.to
     // in the Genome list

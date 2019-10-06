@@ -4,6 +4,7 @@ const config = new Config({
   INPUT_NUM: 2,
   OUTPUT_NUM: 1,
   POP_SIZE: 100,
+  FLUSH_INNOVATIONS: false,
   mutators: {
     BIG_GENOME: 1,
     RAND_REC_LINK_PROB: 0

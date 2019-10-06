@@ -4,10 +4,14 @@ class Population {
   constructor(config) {
     this.species         = [] // List of species, each species is a list of Genomes
     this.newSpecies      = []
-    this.innovations     = { node: [], link: [] }
     this.availableIds    = { node:  0, link:  0, species: 0 }
     this.generation      = 0
     this.config          = config
+    
+    // Innovations contains two arrays holding information about newly added nodes and links.
+    // The node array is indexed by the Link id of the link that was split to create the new Node.
+    // THe link array is indexed by the 
+    this.innovations     = { node: [], link: [] }
 
     this.championSpecies = null
     this.maxFitness      = -Infinity
@@ -133,6 +137,10 @@ class Population {
     this.updateOffspringNum(verbose)
 
     // Create the new Genomes
+    if (this.config.FLUSH_INNOVATIONS) {
+      this.innovations.node = []
+      this.innovations.link = []
+    }
     this.species.forEach( species =>
       species.reproduce(this, this.availableIds, this.innovations, this.config) )
 

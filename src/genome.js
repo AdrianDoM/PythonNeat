@@ -81,7 +81,8 @@ class Genome {
     let sum = 0
     for (const linkId of node.incomingLinks) {
       const link = this.links[linkId]
-      sum += link.weight * this.nodes[link.from].activation
+      if (link.isEnabled)
+        sum += link.weight * this.nodes[link.from].activation
     }
     sum += node.bias
 
